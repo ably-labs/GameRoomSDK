@@ -39,3 +39,37 @@ interface GameRoomController {
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
 }
+internal class GameRoomControllerImpl:GameRoomController{
+    override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun sendTextMessage(from: GamePlayer, to: GamePlayer, messageText: String): MessageSentResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun registerToTextMessage(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unregisterFromPresenceEvents(room: GameRoom) {
+        TODO("Not yet implemented")
+    }
+
+}

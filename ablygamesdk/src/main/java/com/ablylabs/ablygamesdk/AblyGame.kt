@@ -15,7 +15,7 @@ class AblyGame(private val apiKey:String){
     suspend fun enter(player: GamePlayer):Result<Unit>{
         return suspendCoroutine {continuation->
             ably.channels[GLOBAL_CHANNEL_NAME].presence.run {
-                enterClient(player.id, object : CompletionListener {
+                enterClient(player.id, null, object : CompletionListener {
                     override fun onSuccess() {
                         continuation.resume(Result.success(Unit))
                     }

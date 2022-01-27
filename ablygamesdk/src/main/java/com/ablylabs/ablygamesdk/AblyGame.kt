@@ -1,4 +1,7 @@
 package com.ablylabs.ablygamesdk
 
-class AblyGame {
+interface AblyGame {
+    //enter game --global
+    fun enter(player: GamePlayer)
+    fun exit(player: GamePlayer)
 }

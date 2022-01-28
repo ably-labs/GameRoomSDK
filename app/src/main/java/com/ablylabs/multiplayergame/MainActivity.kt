@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findViewById<Button>(R.id.enterButton).setOnClickListener {
             lifecycleScope.launch {
-                val result = MultiplayerGameApp.instance.ablyGame.enter(FutbolPlayer("ikbal"))
+                val result = MultiplayerGameApp.instance.ablyGame.enter(MyGamePlayer("ikbal"))
                 Log.d(TAG, "enter result $result ")
             }
         }

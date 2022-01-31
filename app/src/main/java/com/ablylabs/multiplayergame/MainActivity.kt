@@ -35,10 +35,7 @@ class MainActivity : AppCompatActivity() {
         roomsRecyclerView.addItemDecoration(dividerItemDecoration)
         roomsRecyclerView.adapter = RoomsRecyclerViewAdapter(sampleRooms)
 
-        //enter after some dleay
         lifecycleScope.launch {
-            delay(1000)
-
             val result = MultiplayerGameApp.instance.ablyGameBuilder.build().enter(MyGamePlayer("ikbal"))
             Log.d(TAG, "enter result $result ")
         }

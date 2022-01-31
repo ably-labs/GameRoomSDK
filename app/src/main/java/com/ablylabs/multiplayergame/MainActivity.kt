@@ -2,7 +2,6 @@ package com.ablylabs.multiplayergame
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -38,7 +37,8 @@ class MainActivity : AppCompatActivity() {
         //enter after some dleay
         lifecycleScope.launch {
             delay(1000)
-            val result = MultiplayerGameApp.instance.ablyGame.enter(MyGamePlayer("ikbal"))
+
+            val result = MultiplayerGameApp.instance.ablyGameBuilder.build().enter(MyGamePlayer("ikbal"))
             Log.d(TAG, "enter result $result ")
         }
     }

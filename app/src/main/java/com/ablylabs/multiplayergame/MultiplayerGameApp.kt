@@ -8,16 +8,12 @@ import com.ablylabs.ablygamesdk.AblyGame
 private const val TAG = "MultiplayerGameApp"
 
 class MultiplayerGameApp : Application() {
-    private lateinit var _ablyGame: AblyGame
-    val ablyGame: AblyGame
-        get() = _ablyGame
+    lateinit var ablyGameBuilder: AblyGame.Builder
 
     override fun onCreate() {
         super.onCreate()
-        AblyGame(getString(R.string.ably_key)) {
-            _ablyGame = it
-            //enter after intiailisation
-        }
+        ablyGameBuilder = AblyGame.Builder(getString(R.string.ably_key))
+
         instance = this
     }
 

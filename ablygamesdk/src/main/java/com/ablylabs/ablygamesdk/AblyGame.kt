@@ -21,7 +21,16 @@ import kotlin.coroutines.suspendCoroutine
 
 const val GLOBAL_CHANNEL_NAME = "global"
 
-class AblyGame(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
+class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
+    class Builder(val apiKey: String){
+        suspend fun build():AblyGame{
+            return suspendCoroutine {continuation->
+                AblyGame(apiKey){
+                    continuation.resume(it)
+                }
+            }
+        }
+    }
     private val ably: AblyRealtime = AblyRealtime(apiKey)
 
     init {

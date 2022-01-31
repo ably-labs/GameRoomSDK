@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -34,11 +35,11 @@ class MainActivity : AppCompatActivity() {
         roomsRecyclerView.addItemDecoration(dividerItemDecoration)
         roomsRecyclerView.adapter = RoomsRecyclerViewAdapter(sampleRooms)
 
-        findViewById<Button>(R.id.enterButton).setOnClickListener {
-            lifecycleScope.launch {
-                val result = MultiplayerGameApp.instance.ablyGame.enter(MyGamePlayer("ikbal"))
-                Log.d(TAG, "enter result $result ")
-            }
+        //enter after some dleay
+        lifecycleScope.launch {
+            delay(1000)
+            val result = MultiplayerGameApp.instance.ablyGame.enter(MyGamePlayer("ikbal"))
+            Log.d(TAG, "enter result $result ")
         }
     }
 }

@@ -16,7 +16,7 @@ class MultiplayerGameApp : Application() {
         super.onCreate()
         AblyGame(getString(R.string.ably_key)) {
             _ablyGame = it
-            Log.d(TAG, "game is ready ")
+            //enter after intiailisation
         }
         instance = this
     }

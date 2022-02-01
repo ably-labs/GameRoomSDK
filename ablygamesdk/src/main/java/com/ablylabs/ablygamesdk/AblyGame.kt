@@ -23,19 +23,23 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 const val GLOBAL_CHANNEL_NAME = "global"
-enum class PresenceAction{ENTER,LEAVE}
+
+enum class PresenceAction { ENTER, LEAVE }
 
 class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
-    class Builder(val apiKey: String){
-        suspend fun build():AblyGame{
-            return suspendCoroutine {continuation->
-                AblyGame(apiKey){
-                    continuation.resume(it)
+
+    class Builder(private val apiKey: String) {
+        suspend fun build(): AblyGame {
+            return suspendCoroutine { continuation ->
+                AblyGame(apiKey) { game ->
+                    continuation.resume(game)
                 }
             }
         }
     }
+
     private val ably: AblyRealtime = AblyRealtime(apiKey)
+    val roomsController:GameRoomController = GameRoomControllerImpl(ably)
 
     init {
         ably.connection.on { state ->
@@ -81,14 +85,14 @@ class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) 
         }
     }
 
-    suspend fun numberOfPlayers():Int{
-        return suspendCoroutine { continuation->
+    suspend fun numberOfPlayers(): Int {
+        return suspendCoroutine { continuation ->
             continuation.resume(ably.channels[GLOBAL_CHANNEL_NAME].presence.get().size)
         }
     }
 
 
-    fun subscribeToPlayerNumberUpdate(updated: (action:PresenceAction) -> Unit) {
+    fun subscribeToPlayerNumberUpdate(updated: (action: PresenceAction) -> Unit) {
         val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
         ably.channels[GLOBAL_CHANNEL_NAME].presence.subscribe(observedActions) {
             when (it.action) {

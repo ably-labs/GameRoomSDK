@@ -1,6 +1,9 @@
 package com.ablylabs.ablygamesdk
 
+import io.ably.lib.realtime.AblyRealtime
 import kotlinx.coroutines.flow.Flow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 sealed class EnterRoomResult {
     object Success : EnterRoomResult()
@@ -39,9 +42,15 @@ interface GameRoomController {
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
 }
-internal class GameRoomControllerImpl:GameRoomController{
+internal const val roomNamespace = "room"
+internal const val playerNamespace = "player"
+internal fun roomChannel(gameRoom: GameRoom) = "room:${gameRoom.id}"
+
+internal class GameRoomControllerImpl(private val ably:AblyRealtime):GameRoomController{
     override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
-        TODO("Not yet implemented")
+        return suspendCoroutine { continuation ->
+            continuation.resume(ably.channels[roomChannel(gameRoom)].presence.get().size)
+        }
     }
 
     override suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult {

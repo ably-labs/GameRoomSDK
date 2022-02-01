@@ -34,10 +34,10 @@ interface GameRoomController {
     suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int
     suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult
     suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult
-    suspend fun sendTextMessage(
+    suspend fun sendMessageToPlayer(
         from: GamePlayer,
         to: GamePlayer,
-        messageText: String
+        message: GameMessage
     ): MessageSentResult
 
     suspend fun registerToTextMessage(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
@@ -91,7 +91,7 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
         }
     }
 
-    override suspend fun sendTextMessage(from: GamePlayer, to: GamePlayer, messageText: String): MessageSentResult {
+    override suspend fun sendMessageToPlayer(from: GamePlayer, to: GamePlayer, message: GameMessage): MessageSentResult {
         TODO("Not yet implemented")
     }
 

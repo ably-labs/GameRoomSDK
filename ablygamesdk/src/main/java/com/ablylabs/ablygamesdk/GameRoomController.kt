@@ -5,7 +5,10 @@ import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.Message
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.lang.Exception
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -134,7 +137,20 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
     }
 
     override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
-        TODO("Not yet implemented")
+        return suspendCoroutine { continuation ->
+            val flow = callbackFlow {
+                allPlayers(room)
+                    .filter { receiver != it } //do not create a channel between self-self
+                    .forEach { from ->
+                        val channelId = bidirectinalPlayerChannel(from,receiver)
+                        ably.channels[channelId].subscribe("text") { message->
+                            trySend(ReceivedMessage(from, message.data as String))
+                        }
+                    }
+                awaitClose { cancel() }
+            }
+            continuation.resume(flow)
+        }
 
     }
 

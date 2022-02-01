@@ -75,7 +75,20 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
     }
 
     override suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult {
-        TODO("Not yet implemented")
+        return suspendCoroutine {continuation->
+            ably.channels[roomChannel(gameRoom)].presence.apply {
+                leaveClient(player.id, "no_data", object : CompletionListener {
+                    override fun onSuccess() {
+                        continuation.resume(RoomPresenceResult.Success(gameRoom,player))
+                    }
+
+                    override fun onError(reason: ErrorInfo?) {
+                        continuation.resume(RoomPresenceResult.Failure(gameRoom,player,AblyException.fromErrorInfo(reason)))
+                    }
+                })
+
+            }
+        }
     }
 
     override suspend fun sendTextMessage(from: GamePlayer, to: GamePlayer, messageText: String): MessageSentResult {

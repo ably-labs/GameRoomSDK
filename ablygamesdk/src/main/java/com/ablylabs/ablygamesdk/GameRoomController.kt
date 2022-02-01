@@ -179,7 +179,7 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
     }
 
     override suspend fun unregisterFromPresenceEvents(room: GameRoom) {
-        TODO("Not yet implemented")
+        ably.channels[room.id].presence.unsubscribe()
     }
 
 }

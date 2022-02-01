@@ -43,7 +43,7 @@ interface GameRoomController {
         message: String
     ): MessageSentResult
 
-    suspend fun registerToTextMessage(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
+    suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
@@ -63,9 +63,7 @@ internal fun bidirectinalPlayerChannel(player1: GamePlayer, player2: GamePlayer)
 
 internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoomController {
     override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
-        return suspendCoroutine { continuation ->
-            continuation.resume(ably.channels[roomChannel(gameRoom)].presence.get().size)
-        }
+        return allPlayers(gameRoom).size
     }
 
     override suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult {
@@ -135,12 +133,15 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
 
     }
 
-    override suspend fun registerToTextMessage(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
+    override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
         TODO("Not yet implemented")
+
     }
 
-    override suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer> {
-        TODO("Not yet implemented")
+    override suspend fun allPlayers(room: GameRoom): List<GamePlayer> {
+        return suspendCoroutine {
+            ably.channels[roomChannel(room)].presence.get()
+        }
     }
 
     override suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate> {

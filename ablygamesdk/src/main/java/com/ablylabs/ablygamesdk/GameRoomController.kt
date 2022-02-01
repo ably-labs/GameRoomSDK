@@ -1,13 +1,17 @@
 package com.ablylabs.ablygamesdk
 
 import io.ably.lib.realtime.AblyRealtime
+import io.ably.lib.realtime.CompletionListener
+import io.ably.lib.types.AblyException
+import io.ably.lib.types.ErrorInfo
 import kotlinx.coroutines.flow.Flow
+import java.lang.Exception
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 sealed class EnterRoomResult {
-    object Success : EnterRoomResult()
-    data class Failed(val reason: String) : EnterRoomResult()
+    data class Success(val gameRoom: GameRoom, val player: GamePlayer) : EnterRoomResult()
+    data class Failure(val gameRoom: GameRoom, val player: GamePlayer, val exception:Exception?) : EnterRoomResult()
 }
 
 sealed class LeaveRoomResult {
@@ -22,9 +26,9 @@ sealed class MessageSentResult {
 
 data class ReceivedMessage(val from: GamePlayer, val message: String)
 
-sealed class RoomPresenceUpdate{
-    data class Enter(val player:GamePlayer):RoomPresenceUpdate()
-    data class Leave(val player:GamePlayer):RoomPresenceUpdate()
+sealed class RoomPresenceUpdate {
+    data class Enter(val player: GamePlayer) : RoomPresenceUpdate()
+    data class Leave(val player: GamePlayer) : RoomPresenceUpdate()
 }
 
 interface GameRoomController {
@@ -42,11 +46,12 @@ interface GameRoomController {
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
 }
+
 internal const val roomNamespace = "room"
 internal const val playerNamespace = "player"
 internal fun roomChannel(gameRoom: GameRoom) = "room:${gameRoom.id}"
 
-internal class GameRoomControllerImpl(private val ably:AblyRealtime):GameRoomController{
+internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoomController {
     override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
         return suspendCoroutine { continuation ->
             continuation.resume(ably.channels[roomChannel(gameRoom)].presence.get().size)
@@ -54,7 +59,20 @@ internal class GameRoomControllerImpl(private val ably:AblyRealtime):GameRoomCon
     }
 
     override suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult {
-        TODO("Not yet implemented")
+        return suspendCoroutine { continuation ->
+            ably.channels[roomChannel(gameRoom)].presence.apply {
+                enterClient(player.id, "no_data", object : CompletionListener {
+                    override fun onSuccess() {
+                        continuation.resume(EnterRoomResult.Success(gameRoom,player))
+                    }
+
+                    override fun onError(reason: ErrorInfo?) {
+                        continuation.resume(EnterRoomResult.Failure(gameRoom,player,AblyException.fromErrorInfo(reason)))
+                    }
+                })
+
+            }
+        }
     }
 
     override suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult {

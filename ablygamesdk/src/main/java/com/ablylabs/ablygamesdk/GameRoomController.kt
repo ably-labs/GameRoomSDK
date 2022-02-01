@@ -5,11 +5,13 @@ import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.Message
+import io.ably.lib.types.PresenceMessage
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.lang.Exception
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -142,8 +144,8 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
                 allPlayers(room)
                     .filter { receiver != it } //do not create a channel between self-self
                     .forEach { from ->
-                        val channelId = bidirectinalPlayerChannel(from,receiver)
-                        ably.channels[channelId].subscribe("text") { message->
+                        val channelId = bidirectinalPlayerChannel(from, receiver)
+                        ably.channels[channelId].subscribe("text") { message ->
                             trySend(ReceivedMessage(from, message.data as String))
                         }
                     }
@@ -161,7 +163,19 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
     }
 
     override suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate> {
-        TODO("Not yet implemented")
+        return suspendCoroutine { continuation ->
+            val flow = callbackFlow {
+                val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
+                ably.channels[roomChannel(gameRoom)].presence.subscribe(observedActions) {
+                    when (it.action) {
+                        PresenceMessage.Action.enter -> trySend(RoomPresenceUpdate.Enter(GamePlayer.of(it.clientId)))
+                        PresenceMessage.Action.leave -> trySend(RoomPresenceUpdate.Leave(GamePlayer.of(it.clientId)))
+                    }
+                }
+                awaitClose { cancel() }
+            }
+            continuation.resume(flow)
+        }
     }
 
     override suspend fun unregisterFromPresenceEvents(room: GameRoom) {

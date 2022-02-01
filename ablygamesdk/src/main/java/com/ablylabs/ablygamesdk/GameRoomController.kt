@@ -9,15 +9,14 @@ import java.lang.Exception
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-sealed class EnterRoomResult {
-    data class Success(val gameRoom: GameRoom, val player: GamePlayer) : EnterRoomResult()
-    data class Failure(val gameRoom: GameRoom, val player: GamePlayer, val exception:Exception?) : EnterRoomResult()
+sealed class RoomPresenceResult {
+    data class Success(val gameRoom: GameRoom, val player: GamePlayer) : RoomPresenceResult()
+    data class Failure(val gameRoom: GameRoom, val player: GamePlayer, val exception:Exception?) : RoomPresenceResult()
 }
 
-sealed class LeaveRoomResult {
-    object Success : LeaveRoomResult()
-    data class Failed(val reason: String) : LeaveRoomResult()
-}
+//make result type names a bit more clear
+typealias LeaveRoomResult = RoomPresenceResult
+typealias EnterRoomResult = RoomPresenceResult
 
 sealed class MessageSentResult {
     data class Success(val toWhom: GamePlayer) : MessageSentResult()
@@ -63,11 +62,11 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
             ably.channels[roomChannel(gameRoom)].presence.apply {
                 enterClient(player.id, "no_data", object : CompletionListener {
                     override fun onSuccess() {
-                        continuation.resume(EnterRoomResult.Success(gameRoom,player))
+                        continuation.resume(RoomPresenceResult.Success(gameRoom,player))
                     }
 
                     override fun onError(reason: ErrorInfo?) {
-                        continuation.resume(EnterRoomResult.Failure(gameRoom,player,AblyException.fromErrorInfo(reason)))
+                        continuation.resume(RoomPresenceResult.Failure(gameRoom,player,AblyException.fromErrorInfo(reason)))
                     }
                 })
 

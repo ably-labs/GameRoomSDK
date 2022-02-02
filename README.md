@@ -19,4 +19,5 @@ This SDK currently uses a language of games, but please note that we can change 
 
 This repo comes with an example app that is intended to showcase SDK functionality.
 Please add following line to your ```local.properties``` file to run example app
+
 ```ABLY_KEY={YOUR ABLY API KEY}```

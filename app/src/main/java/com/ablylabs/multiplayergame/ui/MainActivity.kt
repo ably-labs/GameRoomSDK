@@ -1,4 +1,4 @@
-package com.ablylabs.multiplayergame
+package com.ablylabs.multiplayergame.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ablylabs.ablygamesdk.AblyGame
 import com.ablylabs.ablygamesdk.PresenceAction
+import com.ablylabs.multiplayergame.MultiplayerGameApp
+import com.ablylabs.multiplayergame.MyGamePlayer
+import com.ablylabs.multiplayergame.MyGameRoom
+import com.ablylabs.multiplayergame.R
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -17,7 +21,8 @@ import kotlin.random.Random
 private const val TAG = "MainActivity"
 
 class MainActivity : AppCompatActivity() {
-    val sampleRooms = listOf(MyGameRoom("Volleyball room"),MyGameRoom("Basketball room"),MyGameRoom("Football " +
+    val sampleRooms = listOf(
+        MyGameRoom("Volleyball room"),MyGameRoom("Basketball room"),MyGameRoom("Football " +
         "room"),MyGameRoom("Hockey room"),MyGameRoom("Tennis room"))
 
     private lateinit var recyclerLayoutManager:LinearLayoutManager

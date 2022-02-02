@@ -1,20 +1,22 @@
-package com.ablylabs.multiplayergame
+package com.ablylabs.multiplayergame.ui
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.ablylabs.multiplayergame.MyGameRoom
+import com.ablylabs.multiplayergame.R
 
 class RoomsRecyclerViewAdapter(private val rooms:List<MyGameRoom>): RecyclerView.Adapter<RoomsRecyclerViewAdapter.ViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomsRecyclerViewAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_room, parent, false)
 
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: RoomsRecyclerViewAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.roomNameTextView.text = rooms[position].name
     }
 

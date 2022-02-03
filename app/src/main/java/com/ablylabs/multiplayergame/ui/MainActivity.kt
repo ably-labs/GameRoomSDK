@@ -62,6 +62,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        lifecycleScope.launch {
+            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
+            Log.d(TAG, "onDestroy: $leaveResult")
+        }
+        super.onDestroy()
+    }
+
     private fun enterGame() {
         lifecycleScope.launch {
             delay(1000)

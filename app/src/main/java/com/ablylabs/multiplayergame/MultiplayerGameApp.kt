@@ -14,13 +14,12 @@ private const val TAG = "MultiplayerGameApp"
 class MultiplayerGameApp : Application() {
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    lateinit var ablyGame : AblyGame
+    lateinit var ablyGame: AblyGame
 
     override fun onCreate() {
         super.onCreate()
         applicationScope.launch {
             ablyGame = AblyGame.Builder(getString(R.string.ably_key))
-                .scope(applicationScope)
                 .build()
         }
         instance = this

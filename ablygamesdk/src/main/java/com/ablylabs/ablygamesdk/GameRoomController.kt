@@ -69,8 +69,7 @@ internal fun bidirectinalPlayerChannel(player1: GamePlayer, player2: GamePlayer)
 }
 
 internal class GameRoomControllerImpl(
-    private val ably: AblyRealtime,
-    private val scope: CoroutineScope
+    private val ably: AblyRealtime
 ) : GameRoomController {
     override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
         return allPlayers(gameRoom).size
@@ -83,23 +82,20 @@ internal class GameRoomControllerImpl(
                 println("enter thread where enter called ${Thread.currentThread()}")
                 enterClient(player.id, "no_data", object : CompletionListener {
                     override fun onSuccess() {
-                        scope.launch {
-                            println("enter thread onSuccess ${Thread.currentThread()}")
-                            continuation.resume(RoomPresenceResult.Success(gameRoom, player))
-                        }
+                        println("enter thread onSuccess ${Thread.currentThread()}")
+                        continuation.resume(RoomPresenceResult.Success(gameRoom, player))
                     }
 
                     override fun onError(reason: ErrorInfo?) {
-                        scope.launch {
-                            println("enter thread onError ${Thread.currentThread()}")
-                            continuation.resume(
-                                RoomPresenceResult.Failure(
-                                    gameRoom,
-                                    player,
-                                    AblyException.fromErrorInfo(reason)
-                                )
+                        println("enter thread onError ${Thread.currentThread()}")
+                        continuation.resume(
+                            RoomPresenceResult.Failure(
+                                gameRoom,
+                                player,
+                                AblyException.fromErrorInfo(reason)
                             )
-                        }
+                        )
+
                     }
                 })
 

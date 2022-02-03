@@ -15,29 +15,19 @@ const val GLOBAL_CHANNEL_NAME = "global"
 
 enum class PresenceAction { ENTER, LEAVE }
 
-class AblyGame private constructor(apiKey: String, scope: CoroutineScope, gameOn: (ablyGame: AblyGame) -> Unit) {
-
+class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
     class Builder(private val apiKey: String) {
-        private var scope: CoroutineScope? = null
         suspend fun build(): AblyGame {
-            if (this.scope == null) {
-                throw Exception("No scope provided ")
-            }
             return suspendCoroutine { continuation ->
-                AblyGame(apiKey,scope!!) { game ->
+                AblyGame(apiKey) { game ->
                     continuation.resume(game)
                 }
             }
         }
-
-        fun scope(scope: CoroutineScope): Builder {
-            this.scope = scope
-            return this
-        }
     }
 
     private val ably: AblyRealtime = AblyRealtime(apiKey)
-    val roomsController: GameRoomController = GameRoomControllerImpl(ably,scope)
+    val roomsController: GameRoomController = GameRoomControllerImpl(ably)
 
     init {
         ably.connection.on { state ->

@@ -18,6 +18,7 @@ import com.ablylabs.multiplayergame.MyGameRoom
 import com.ablylabs.multiplayergame.R
 import com.ablylabs.pubcrawler.ui.GameRoomActivity
 import com.google.gson.Gson
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         val numberOfPlayersTextView = findViewById<TextView>(R.id.numberOfPlayersTextView)
 
         lifecycleScope.launch {
+            delay(1000)
             ablyGame = MultiplayerGameApp.instance.ablyGame
             //also register to changes
             ablyGame.subscribeToPlayerNumberUpdate {

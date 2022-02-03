@@ -3,17 +3,24 @@ package com.ablylabs.multiplayergame
 import android.app.Application
 import android.util.Log
 import com.ablylabs.ablygamesdk.AblyGame
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "MultiplayerGameApp"
 
 class MultiplayerGameApp : Application() {
-    lateinit var ablyGameBuilder: AblyGame.Builder
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    lateinit var ablyGame : AblyGame
 
     override fun onCreate() {
         super.onCreate()
-        ablyGameBuilder = AblyGame.Builder(getString(R.string.ably_key))
-
+        applicationScope.launch {
+            ablyGame = AblyGame.Builder(getString(R.string.ably_key)).build()
+        }
         instance = this
     }
 

@@ -1,5 +1,6 @@
 package com.ablylabs.multiplayergame.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
@@ -9,11 +10,14 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ablylabs.ablygamesdk.AblyGame
+import com.ablylabs.ablygamesdk.GameRoom
 import com.ablylabs.ablygamesdk.PresenceAction
 import com.ablylabs.multiplayergame.MultiplayerGameApp
 import com.ablylabs.multiplayergame.MyGamePlayer
 import com.ablylabs.multiplayergame.MyGameRoom
 import com.ablylabs.multiplayergame.R
+import com.ablylabs.pubcrawler.ui.GameRoomActivity
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -43,12 +47,12 @@ class MainActivity : AppCompatActivity() {
             recyclerLayoutManager.orientation
         )
         roomsRecyclerView.addItemDecoration(dividerItemDecoration)
-        roomsRecyclerView.adapter = RoomsRecyclerViewAdapter(sampleRooms)
+        roomsRecyclerView.adapter = RoomsRecyclerViewAdapter(sampleRooms,this::onRoomTap)
 
         val numberOfPlayersTextView = findViewById<TextView>(R.id.numberOfPlayersTextView)
 
         lifecycleScope.launch {
-            ablyGame = MultiplayerGameApp.instance.ablyGameBuilder.build()
+            ablyGame = MultiplayerGameApp.instance.ablyGame
             //also register to changes
             ablyGame.subscribeToPlayerNumberUpdate {
                 //you can either update numbers here or pull numberOfPlayers
@@ -67,6 +71,19 @@ class MainActivity : AppCompatActivity() {
             numberOfPlayers = ablyGame.numberOfPlayers()
             numberOfPlayersTextView.text = "${numberOfPlayers} players"
 
+        }
+    }
+
+    private fun onRoomTap(gameRoom: GameRoom){
+        checkName(this) { name ->
+            val who = MyGamePlayer(name)
+
+            Intent(this, GameRoomActivity::class.java).run {
+                val gson = Gson()
+                putExtra(GameRoomActivity.EXTRA_ROOM_JSON, gson.toJson(gameRoom))
+                putExtra(GameRoomActivity.EXTRA_PLAYER_JSON, gson.toJson(who))
+                startActivity(this)
+            }
         }
     }
 }

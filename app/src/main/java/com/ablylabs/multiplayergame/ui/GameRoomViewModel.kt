@@ -16,8 +16,7 @@ import com.ablylabs.ablygamesdk.RoomPresenceUpdate
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-private const val TAG = "PubViewModel"
-
+private const val TAG = "GameRoomViewModel"
 class GameRoomViewModel(private val controller: GameRoomController) : ViewModel() {
     //following needs to be transformed from flows, they need not to be exposed like this
     private val _presenceActions = MutableLiveData<RoomPresenceUpdate>()
@@ -52,9 +51,13 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
     }
 
     fun enterRoom(who: GamePlayer, which: GameRoom) {
+        Log.d(TAG, "enterRoom: before launch")
         viewModelScope.launch {
+            Log.d(TAG, "enterRoom: entering")
             _enterResult.value = controller.enter(player = who, gameRoom = which)
+            Log.d(TAG, "enterRoom: enter result :${enterResult.value}")
             _allPlayers.value = controller.allPlayers(which)
+            Log.d(TAG, "enterRoom: all players ${_allPlayers.value?.size}")
             if (_enterResult.value is RoomPresenceResult.Success) {
                 actionJob = launch { buildActionFlowFor(which, who) }
                 launch { buildPresenceFlow(which, who) }

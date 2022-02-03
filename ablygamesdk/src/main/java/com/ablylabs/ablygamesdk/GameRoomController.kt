@@ -170,8 +170,11 @@ internal class GameRoomControllerImpl(
     }
 
     override suspend fun allPlayers(room: GameRoom): List<GamePlayer> {
-        return suspendCoroutine {
-            ably.channels[roomChannel(room)].presence.get()
+        return suspendCoroutine { continuation ->
+            val presenceMessages = ably.channels[roomChannel(room)].presence.get()
+            presenceMessages?.let {
+                continuation.resume(it.toList().map { GamePlayer.of(it.clientId) })
+            }
         }
     }
 

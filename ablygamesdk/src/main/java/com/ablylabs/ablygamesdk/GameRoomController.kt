@@ -56,14 +56,14 @@ interface GameRoomController {
 
 internal const val roomNamespace = "room"
 internal const val playerNamespace = "player"
-internal fun roomChannel(gameRoom: GameRoom) = "room:${gameRoom.id}"
+internal fun roomChannel(gameRoom: GameRoom) = "$roomNamespace:${gameRoom.id}"
 internal fun bidirectinalPlayerChannel(player1: GamePlayer, player2: GamePlayer): String {
     //this should return thee same regardless of playerIds, so it is a good idea to use them by their order
     val comparisonResult = player1.id.compareTo(player2.id)
     if (comparisonResult > 0) {
-        return "player:${player2.id}-${player1.id}"
+        return "$playerNamespace:${player2.id}-${player1.id}"
     }
-    return "player:${player1.id}-${player2.id}"
+    return "$playerNamespace:${player1.id}-${player2.id}"
 }
 
 internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoomController {

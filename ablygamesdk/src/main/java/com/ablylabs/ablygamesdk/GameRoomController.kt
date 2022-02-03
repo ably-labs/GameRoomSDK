@@ -6,10 +6,12 @@ import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.Message
 import io.ably.lib.types.PresenceMessage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 import kotlin.coroutines.resume
@@ -66,27 +68,38 @@ internal fun bidirectinalPlayerChannel(player1: GamePlayer, player2: GamePlayer)
     return "$playerNamespace:${player1.id}-${player2.id}"
 }
 
-internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoomController {
+internal class GameRoomControllerImpl(
+    private val ably: AblyRealtime,
+    private val scope: CoroutineScope
+) : GameRoomController {
     override suspend fun numberOfPeopleInRoom(gameRoom: GameRoom): Int {
         return allPlayers(gameRoom).size
     }
 
     override suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult {
+        println("enter thread before suspendCoroutine ${Thread.currentThread()}")
         return suspendCoroutine { continuation ->
-            ably.channels[roomChannel(gameRoom)].presence.apply {
+            ably.channels[roomChannel(gameRoom)].presence.run {
+                println("enter thread where enter called ${Thread.currentThread()}")
                 enterClient(player.id, "no_data", object : CompletionListener {
                     override fun onSuccess() {
-                        continuation.resume(RoomPresenceResult.Success(gameRoom, player))
+                        scope.launch {
+                            println("enter thread onSuccess ${Thread.currentThread()}")
+                            continuation.resume(RoomPresenceResult.Success(gameRoom, player))
+                        }
                     }
 
                     override fun onError(reason: ErrorInfo?) {
-                        continuation.resume(
-                            RoomPresenceResult.Failure(
-                                gameRoom,
-                                player,
-                                AblyException.fromErrorInfo(reason)
+                        scope.launch {
+                            println("enter thread onError ${Thread.currentThread()}")
+                            continuation.resume(
+                                RoomPresenceResult.Failure(
+                                    gameRoom,
+                                    player,
+                                    AblyException.fromErrorInfo(reason)
+                                )
                             )
-                        )
+                        }
                     }
                 })
 
@@ -96,7 +109,7 @@ internal class GameRoomControllerImpl(private val ably: AblyRealtime) : GameRoom
 
     override suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult {
         return suspendCoroutine { continuation ->
-            ably.channels[roomChannel(gameRoom)].presence.apply {
+            ably.channels[roomChannel(gameRoom)].presence.run {
                 leaveClient(player.id, "no_data", object : CompletionListener {
                     override fun onSuccess() {
                         continuation.resume(RoomPresenceResult.Success(gameRoom, player))

@@ -3,21 +3,10 @@ package com.ablylabs.ablygamesdk
 import io.ably.lib.realtime.AblyRealtime
 import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.realtime.ConnectionState
-import io.ably.lib.realtime.ConnectionStateListener
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.PresenceMessage
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.internal.ChannelFlow
-import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -26,20 +15,29 @@ const val GLOBAL_CHANNEL_NAME = "global"
 
 enum class PresenceAction { ENTER, LEAVE }
 
-class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
+class AblyGame private constructor(apiKey: String, scope: CoroutineScope, gameOn: (ablyGame: AblyGame) -> Unit) {
 
     class Builder(private val apiKey: String) {
+        private var scope: CoroutineScope? = null
         suspend fun build(): AblyGame {
+            if (this.scope == null) {
+                throw Exception("No scope provided ")
+            }
             return suspendCoroutine { continuation ->
-                AblyGame(apiKey) { game ->
+                AblyGame(apiKey,scope!!) { game ->
                     continuation.resume(game)
                 }
             }
         }
+
+        fun scope(scope: CoroutineScope): Builder {
+            this.scope = scope
+            return this
+        }
     }
 
     private val ably: AblyRealtime = AblyRealtime(apiKey)
-    val roomsController:GameRoomController = GameRoomControllerImpl(ably)
+    val roomsController: GameRoomController = GameRoomControllerImpl(ably,scope)
 
     init {
         ably.connection.on { state ->

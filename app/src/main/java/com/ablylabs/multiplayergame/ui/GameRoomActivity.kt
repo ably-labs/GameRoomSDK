@@ -89,7 +89,6 @@ class GameRoomActivity : AppCompatActivity() {
         }
 
         viewModel.allPlayers.observe(this) {
-
             supportActionBar?.subtitle = "${it.size} people here"
             playersAdapter.setPlayers(it)
             playersAdapter.notifyDataSetChanged()

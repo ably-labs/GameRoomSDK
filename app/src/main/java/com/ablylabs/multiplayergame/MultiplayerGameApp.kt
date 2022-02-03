@@ -19,7 +19,9 @@ class MultiplayerGameApp : Application() {
     override fun onCreate() {
         super.onCreate()
         applicationScope.launch {
-            ablyGame = AblyGame.Builder(getString(R.string.ably_key)).build()
+            ablyGame = AblyGame.Builder(getString(R.string.ably_key))
+                .scope(applicationScope)
+                .build()
         }
         instance = this
     }

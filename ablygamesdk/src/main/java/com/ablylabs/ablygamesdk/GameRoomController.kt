@@ -1,6 +1,7 @@
 package com.ablylabs.ablygamesdk
 
 import io.ably.lib.realtime.AblyRealtime
+import io.ably.lib.realtime.ChannelBase
 import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
@@ -49,6 +50,7 @@ interface GameRoomController {
     ): MessageSentResult
 
     suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
+    suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
@@ -147,6 +149,7 @@ internal class GameRoomControllerImpl(
                     .filter { receiver != it } //do not create a channel between self-self
                     .forEach { from ->
                         val channelId = unidirectionalPlayerChannel(from, receiver)
+                        System.out.println("Registering to channel $channelId")
                         ably.channels[channelId].subscribe("text") { message ->
                             println("Messaged received from ${from.id}")
                             trySend(ReceivedMessage(from, message.data as String))
@@ -159,11 +162,24 @@ internal class GameRoomControllerImpl(
 
     }
 
+    override suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit> {
+        val allPlayers = allPlayers(room)
+        return suspendCoroutine { continuation ->
+                allPlayers.filter { receiver != it } //do not create a channel between self-self
+                .forEach { from ->
+                    val channelId = unidirectionalPlayerChannel(from, receiver)
+                    System.out.println("Unregistering from $channelId")
+                    ably.channels[channelId].unsubscribe()
+                    continuation.resume(Result.success(Unit))
+                }
+        }
+    }
+
     override suspend fun allPlayers(room: GameRoom): List<GamePlayer> {
         return suspendCoroutine { continuation ->
             val presenceMessages = ably.channels[roomChannel(room)].presence.get()
             presenceMessages?.let {
-                continuation.resume(it.toList().map { GamePlayer.of(it.clientId) })
+                continuation.resume(it.toList().map { DefaultGamePlayer(it.clientId) })
             }
         }
     }
@@ -174,8 +190,8 @@ internal class GameRoomControllerImpl(
                 val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
                 ably.channels[roomChannel(gameRoom)].presence.subscribe(observedActions) {
                     when (it.action) {
-                        PresenceMessage.Action.enter -> trySend(RoomPresenceUpdate.Enter(GamePlayer.of(it.clientId)))
-                        PresenceMessage.Action.leave -> trySend(RoomPresenceUpdate.Leave(GamePlayer.of(it.clientId)))
+                        PresenceMessage.Action.enter -> trySend(RoomPresenceUpdate.Enter(DefaultGamePlayer(it.clientId)))
+                        PresenceMessage.Action.leave -> trySend(RoomPresenceUpdate.Leave(DefaultGamePlayer(it.clientId)))
                     }
                 }
                 awaitClose { cancel() }

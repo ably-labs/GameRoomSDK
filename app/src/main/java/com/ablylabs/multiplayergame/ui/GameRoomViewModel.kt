@@ -44,6 +44,9 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
     fun leaveRoom(who: GamePlayer, which: GameRoom) {
         viewModelScope.launch {
             _leaveResult.value = controller.leave(who, which)
+            //also manually unsubscribe
+            controller.unregisterFromRoomMessages(which,who)
+
             if (_leaveResult.value is LeaveRoomResult) {
                 _allPlayers.value = controller.allPlayers(which)
             }

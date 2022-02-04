@@ -6,12 +6,10 @@ import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.Message
 import io.ably.lib.types.PresenceMessage
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 import kotlin.coroutines.resume
@@ -59,12 +57,7 @@ interface GameRoomController {
 internal const val roomNamespace = "room"
 internal const val playerNamespace = "player"
 internal fun roomChannel(gameRoom: GameRoom) = "$roomNamespace:${gameRoom.id}"
-internal fun bidirectinalPlayerChannel(player1: GamePlayer, player2: GamePlayer): String {
-    //this should return thee same regardless of playerIds, so it is a good idea to use them by their order
-    val comparisonResult = player1.id.compareTo(player2.id)
-    if (comparisonResult > 0) {
-        return "$playerNamespace:${player2.id}-${player1.id}"
-    }
+internal fun unidirectionalPlayerChannel(player1: GamePlayer, player2: GamePlayer): String {
     return "$playerNamespace:${player1.id}-${player2.id}"
 }
 
@@ -131,7 +124,7 @@ internal class GameRoomControllerImpl(
         //this message name should be derived from message when migrated
         val message = Message("text", messageText, from.id)
         //this should be a bidirectional channel between two players
-        val channelId = bidirectinalPlayerChannel(from, to)
+        val channelId = unidirectionalPlayerChannel(from, to)
         return suspendCoroutine { continuation ->
             ably.channels[channelId]
                 .publish(message, object : CompletionListener {
@@ -153,8 +146,9 @@ internal class GameRoomControllerImpl(
                 allPlayers(room)
                     .filter { receiver != it } //do not create a channel between self-self
                     .forEach { from ->
-                        val channelId = bidirectinalPlayerChannel(from, receiver)
+                        val channelId = unidirectionalPlayerChannel(from, receiver)
                         ably.channels[channelId].subscribe("text") { message ->
+                            println("Messaged received from ${from.id}")
                             trySend(ReceivedMessage(from, message.data as String))
                         }
                     }

@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
                     PresenceAction.ENTER -> numberOfPlayers++
                     PresenceAction.LEAVE -> numberOfPlayers--
                 }
+                Log.d(TAG, "number of players changed to $numberOfPlayers")
                 numberOfPlayersTextView.text = "${numberOfPlayers} players"
             }
             val enterResult = ablyGame.enter(gamePlayer)

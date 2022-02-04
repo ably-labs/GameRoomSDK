@@ -7,6 +7,7 @@ import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
 import io.ably.lib.types.PresenceMessage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -15,14 +16,24 @@ const val GLOBAL_CHANNEL_NAME = "global"
 
 enum class PresenceAction { ENTER, LEAVE }
 
-class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) -> Unit) {
+class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, gameOn: (ablyGame: AblyGame) -> Unit) {
+
     class Builder(private val apiKey: String) {
+        private lateinit var _scope: CoroutineScope
         suspend fun build(): AblyGame {
+            if (!(this::_scope.isInitialized)){
+                throw Exception("scope is not provided")
+            }
             return suspendCoroutine { continuation ->
-                AblyGame(apiKey) { game ->
+                AblyGame(apiKey,_scope) { game ->
                     continuation.resume(game)
                 }
             }
+        }
+
+        fun scope(scope: CoroutineScope): Builder {
+            this._scope = scope
+            return this
         }
     }
 
@@ -44,7 +55,10 @@ class AblyGame private constructor(apiKey: String, gameOn: (ablyGame: AblyGame) 
                 //unable to use this api without data
                 enterClient(player.id, "no data", object : CompletionListener {
                     override fun onSuccess() {
-                        continuation.resume(Result.success(Unit))
+                        scope.launch {
+                            continuation.resume(Result.success(Unit))
+                        }
+
                     }
 
                     override fun onError(reason: ErrorInfo?) {

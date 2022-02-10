@@ -38,8 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var numberOfPlayersTextView: TextView
     private lateinit var ablyGame: AblyGame
     private lateinit var gamePlayer: MyGamePlayer
-    private var numberOfPlayers = 0
-
     private lateinit var enterButton: Button
     private var inGame = false
 
@@ -67,6 +65,15 @@ class MainActivity : AppCompatActivity() {
             ablyGame = MultiplayerGameApp.instance.ablyGame
             setupEnterButton()
             subscribeToGameEvents()
+
+            updateNumberOfPlayers()
+        }
+    }
+
+    private fun updateNumberOfPlayers() {
+        lifecycleScope.launch {
+            val numberOfPlayers = ablyGame.numberOfPlayers()
+            numberOfPlayersTextView.text = "${numberOfPlayers} players"
         }
     }
 
@@ -85,8 +92,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun leaveGame() {
         lifecycleScope.launch {
+            enterButton.isEnabled = false
             val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
-            if (leaveResult.isSuccess){
+            enterButton.isEnabled = true
+            if (leaveResult.isSuccess) {
                 inGame = false
                 Log.d(TAG, "Successful leave")
 
@@ -98,19 +107,18 @@ class MainActivity : AppCompatActivity() {
     private fun enterGame() {
         lifecycleScope.launch {
             //also register to changes
-            launch {
-                val enterResult = ablyGame.enter(gamePlayer)
-                if (enterResult.isSuccess) {
-                    inGame = true
-                    Log.d(TAG, "Successful entry")
-                } else {
-                    Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
-                }
-                updateEnterButton()
+            enterButton.isEnabled = false
+            val enterResult = ablyGame.enter(gamePlayer)
+            enterButton.isEnabled = true
+            if (enterResult.isSuccess) {
+                inGame = true
+                Log.d(TAG, "Successful entry")
+            } else {
+                Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
             }
+            updateEnterButton()
 
-            numberOfPlayers = ablyGame.numberOfPlayers()
-            numberOfPlayersTextView.text = "${numberOfPlayers} players"
+
         }
     }
 
@@ -120,15 +128,12 @@ class MainActivity : AppCompatActivity() {
             when (it) {
                 is PresenceAction.Enter -> {
                     Log.d(TAG, "PresenceAction.Enter ${it.player.id}")
-                    numberOfPlayers++
                 }
                 is PresenceAction.Leave -> {
                     Log.d(TAG, "PresenceAction.Leave ${it.player.id}")
-                    numberOfPlayers--
                 }
             }
-            Log.d(TAG, "number of players changed to $numberOfPlayers")
-            numberOfPlayersTextView.text = "${numberOfPlayers} players"
+            updateNumberOfPlayers()
         }
     }
 

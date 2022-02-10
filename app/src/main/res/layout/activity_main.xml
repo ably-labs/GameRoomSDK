@@ -11,20 +11,21 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:background="@color/teal_200"
         app:layout_constraintEnd_toEndOf="parent"
-        app:title="@string/app_name"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/app_name"
+        tools:background="@color/teal_200">
+
         <TextView
             android:id="@+id/numberOfPlayersTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="123 players"
             android:layout_gravity="end|center_vertical"
             android:layout_marginRight="16dp"
+            android:textColor="@color/design_default_color_on_primary"
             android:textSize="24sp"
-            android:textColor="@color/design_default_color_on_primary"/>
+            tools:text="123 players" />
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -37,6 +38,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-       />
+        app:layout_constraintTop_toBottomOf="@+id/enterGameButton" />
+
+    <Button
+        android:id="@+id/enterGameButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="23dp"
+        android:text="@string/enter_game"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 </androidx.constraintlayout.widget.ConstraintLayout>

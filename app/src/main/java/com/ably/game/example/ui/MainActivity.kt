@@ -3,6 +3,7 @@ package com.ably.game.example.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -38,10 +39,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ablyGame: AblyGame
     private lateinit var gamePlayer: MyGamePlayer
     private var numberOfPlayers = 0
+
+    private lateinit var enterButton: Button
+    private var inGame = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
+        enterButton = findViewById(R.id.enterGameButton)
 
         recyclerLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         roomsRecyclerView = findViewById(R.id.roomsRecyclerView)
@@ -55,44 +61,79 @@ class MainActivity : AppCompatActivity() {
         roomsRecyclerView.adapter = RoomsRecyclerViewAdapter(sampleRooms, this::onRoomTap)
 
         numberOfPlayersTextView = findViewById(R.id.numberOfPlayersTextView)
-        checkName(this) { name ->
-            gamePlayer = MyGamePlayer(name)
-            enterGame()
+
+        lifecycleScope.launch {
+            delay(1000)
+            ablyGame = MultiplayerGameApp.instance.ablyGame
+            setupEnterButton()
+            subscribeToGameEvents()
         }
     }
 
-    override fun onDestroy() {
+    private fun setupEnterButton() {
+        enterButton.setOnClickListener {
+            if (inGame) {
+                leaveGame()
+            } else {
+                checkName(this) { name ->
+                    gamePlayer = MyGamePlayer(name)
+                    enterGame()
+                }
+            }
+        }
+    }
+
+    private fun leaveGame() {
         lifecycleScope.launch {
             val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
-            Log.d(TAG, "onDestroy: $leaveResult")
+            if (leaveResult.isSuccess){
+                inGame = false
+                Log.d(TAG, "Successful leave")
+
+            }
+            updateEnterButton()
         }
-        super.onDestroy()
     }
 
     private fun enterGame() {
         lifecycleScope.launch {
-            delay(1000)
-            ablyGame = MultiplayerGameApp.instance.ablyGame
             //also register to changes
-            ablyGame.subscribeToPlayerNumberUpdate {
-                //you can either update numbers here or pull numberOfPlayers
-                when (it) {
-                    PresenceAction.ENTER -> numberOfPlayers++
-                    PresenceAction.LEAVE -> numberOfPlayers--
+            launch {
+                val enterResult = ablyGame.enter(gamePlayer)
+                if (enterResult.isSuccess) {
+                    inGame = true
+                    Log.d(TAG, "Successful entry")
+                } else {
+                    Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
                 }
-                Log.d(TAG, "number of players changed to $numberOfPlayers")
-                numberOfPlayersTextView.text = "${numberOfPlayers} players"
+                updateEnterButton()
             }
-            val enterResult = ablyGame.enter(gamePlayer)
-            if (enterResult.isSuccess) {
-                Log.d(TAG, "Successful entry")
-            } else {
-                Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
-            }
+
             numberOfPlayers = ablyGame.numberOfPlayers()
             numberOfPlayersTextView.text = "${numberOfPlayers} players"
-
         }
+    }
+
+    private fun subscribeToGameEvents() {
+        ablyGame.subscribeToPlayerNumberUpdate {
+            //you can either update numbers here or pull numberOfPlayers
+            when (it) {
+                is PresenceAction.Enter -> {
+                    Log.d(TAG, "PresenceAction.Enter ${it.player.id}")
+                    numberOfPlayers++
+                }
+                is PresenceAction.Leave -> {
+                    Log.d(TAG, "PresenceAction.Leave ${it.player.id}")
+                    numberOfPlayers--
+                }
+            }
+            Log.d(TAG, "number of players changed to $numberOfPlayers")
+            numberOfPlayersTextView.text = "${numberOfPlayers} players"
+        }
+    }
+
+    private fun updateEnterButton() {
+        enterButton.text = if (inGame) getString(R.string.leave_game) else getString(R.string.enter_game)
     }
 
     private fun onRoomTap(gameRoom: GameRoom) {

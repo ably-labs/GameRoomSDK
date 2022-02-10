@@ -4,14 +4,14 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
-        android:name=".MultiplayerGameApp"
+        android:name="com.ably.game.example.MultiplayerGameApp"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiplayerGame">
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.ably.game.example.ui.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">
             <intent-filter>

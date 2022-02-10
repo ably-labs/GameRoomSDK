@@ -1,4 +1,4 @@
-package com.ablylabs.ablygamesdk
+package com.ably.game.room
 
 import io.ably.lib.realtime.AblyRealtime
 import io.ably.lib.realtime.CompletionListener

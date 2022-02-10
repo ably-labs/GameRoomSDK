@@ -1,4 +1,4 @@
-package com.ablylabs.multiplayergame.ui
+package com.ably.game.example.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,18 +9,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.ablylabs.ablygamesdk.AblyGame
-import com.ablylabs.ablygamesdk.GameRoom
-import com.ablylabs.ablygamesdk.PresenceAction
-import com.ablylabs.multiplayergame.MultiplayerGameApp
-import com.ablylabs.multiplayergame.MyGamePlayer
-import com.ablylabs.multiplayergame.MyGameRoom
+import com.ably.game.room.AblyGame
+import com.ably.game.room.GameRoom
+import com.ably.game.room.PresenceAction
+import com.ably.game.example.MultiplayerGameApp
+import com.ably.game.example.MyGamePlayer
+import com.ably.game.example.MyGameRoom
 import com.ablylabs.multiplayergame.R
 import com.ablylabs.pubcrawler.ui.GameRoomActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 
 private const val TAG = "MainActivity"

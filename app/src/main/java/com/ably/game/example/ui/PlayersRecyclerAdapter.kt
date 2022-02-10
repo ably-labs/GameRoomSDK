@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.ablylabs.ablygamesdk.GamePlayer
+import com.ably.game.room.GamePlayer
 import com.ablylabs.multiplayergame.R
-import com.ablylabs.multiplayergame.ui.checkName
+import com.ably.game.example.ui.checkName
 
 
 class PlayersRecyclerAdapter(

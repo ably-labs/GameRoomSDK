@@ -3,15 +3,15 @@ package com.ablylabs.pubcrawler.ui
 import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
-import com.ablylabs.ablygamesdk.EnterRoomResult
-import com.ablylabs.ablygamesdk.GamePlayer
-import com.ablylabs.ablygamesdk.GameRoom
-import com.ablylabs.ablygamesdk.GameRoomController
-import com.ablylabs.ablygamesdk.LeaveRoomResult
-import com.ablylabs.ablygamesdk.MessageSentResult
-import com.ablylabs.ablygamesdk.ReceivedMessage
-import com.ablylabs.ablygamesdk.RoomPresenceResult
-import com.ablylabs.ablygamesdk.RoomPresenceUpdate
+import com.ably.game.room.EnterRoomResult
+import com.ably.game.room.GamePlayer
+import com.ably.game.room.GameRoom
+import com.ably.game.room.GameRoomController
+import com.ably.game.room.LeaveRoomResult
+import com.ably.game.room.MessageSentResult
+import com.ably.game.room.ReceivedMessage
+import com.ably.game.room.RoomPresenceResult
+import com.ably.game.room.RoomPresenceUpdate
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

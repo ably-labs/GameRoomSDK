@@ -1,8 +1,8 @@
-package com.ablylabs.multiplayergame
+package com.ably.game.example
 
 import android.app.Application
-import android.util.Log
-import com.ablylabs.ablygamesdk.AblyGame
+import com.ably.game.room.AblyGame
+import com.ablylabs.multiplayergame.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

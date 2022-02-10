@@ -1,4 +1,4 @@
-package com.ablylabs.multiplayergame.ui
+package com.ably.game.example.ui
 
 import android.content.Context
 import com.ablylabs.multiplayergame.R

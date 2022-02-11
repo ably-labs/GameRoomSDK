@@ -4,7 +4,6 @@ import io.ably.lib.realtime.AblyRealtime
 import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ErrorInfo
-import io.ably.lib.types.Message
 import io.ably.lib.types.PresenceMessage
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -29,7 +28,7 @@ sealed class MessageSentResult {
     data class Failed(val toWhom: GamePlayer, val exception: Exception?) : MessageSentResult()
 }
 
-data class ReceivedMessage(val from: GamePlayer, val message: String)
+data class ReceivedMessage(val from: GamePlayer, val message: GameMessage)
 
 sealed class RoomPresenceUpdate {
     data class Enter(val player: GamePlayer) : RoomPresenceUpdate()
@@ -45,7 +44,7 @@ interface GameRoomController {
     suspend fun sendMessageToPlayer(
         from: GamePlayer,
         to: GamePlayer,
-        message: String
+        message: GameMessage
     ): MessageSentResult
 
     suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
@@ -120,10 +119,10 @@ internal class GameRoomControllerImpl(
         }
     }
 
-    override suspend fun sendMessageToPlayer(from: GamePlayer, to: GamePlayer, messageText: String):
+    override suspend fun sendMessageToPlayer(from: GamePlayer, to: GamePlayer, message: GameMessage):
             MessageSentResult {
-        //this message name should be derived from message when migrated
-        val message = Message("text", messageText, from.id)
+        //construct this message from GameMessage
+        val message = message.ablyMessage(from.id) // Message("text", message, from.id)
         //this should be a bidirectional channel between two players
         val channelId = unidirectionalPlayerChannel(from, to)
         return suspendCoroutine { continuation ->
@@ -151,7 +150,7 @@ internal class GameRoomControllerImpl(
                         System.out.println("Registering to channel $channelId")
                         ably.channels[channelId].subscribe("text") { message ->
                             println("Messaged received from ${from.id}")
-                            trySend(ReceivedMessage(from, message.data as String))
+                            trySend(ReceivedMessage(from, message.gameMessage()))
                         }
                     }
                 awaitClose { cancel() }
@@ -164,7 +163,7 @@ internal class GameRoomControllerImpl(
     override suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit> {
         val allPlayers = allPlayers(room)
         return suspendCoroutine { continuation ->
-                allPlayers.filter { receiver != it } //do not create a channel between self-self
+            allPlayers.filter { receiver != it } //do not create a channel between self-self
                 .forEach { from ->
                     val channelId = unidirectionalPlayerChannel(from, receiver)
                     System.out.println("Unregistering from $channelId")

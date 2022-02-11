@@ -4,4 +4,6 @@
     <string name="submit">Submit</string>
     <string name="leave">Leave</string>
     <string name="say_hi">Say hi</string>
+    <string name="enter_game">Enter game</string>
+    <string name="leave_game">Leave game</string>
 </resources>

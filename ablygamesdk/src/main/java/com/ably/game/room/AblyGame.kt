@@ -14,18 +14,22 @@ import kotlin.coroutines.suspendCoroutine
 
 const val GLOBAL_CHANNEL_NAME = "global"
 
-enum class PresenceAction { ENTER, LEAVE }
+sealed class PresenceAction{
+    data class Enter(val player: GamePlayer):PresenceAction()
+    data class Leave(val player: GamePlayer):PresenceAction()
+}
 
 class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, gameOn: (ablyGame: AblyGame) -> Unit) {
 
     class Builder(private val apiKey: String) {
         private lateinit var _scope: CoroutineScope
+
         suspend fun build(): AblyGame {
-            if (!(this::_scope.isInitialized)){
+            if (!(this::_scope.isInitialized)) {
                 throw Exception("scope is not provided")
             }
             return suspendCoroutine { continuation ->
-                AblyGame(apiKey,_scope) { game ->
+                AblyGame(apiKey, _scope) { game ->
                     continuation.resume(game)
                 }
             }
@@ -38,12 +42,14 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
     }
 
     private val ably: AblyRealtime = AblyRealtime(apiKey)
-    val roomsController: GameRoomController = GameRoomControllerImpl(ably)
-
+    val roomsController: GameRoomController
     init {
+        roomsController = GameRoomControllerImpl(ably)
         ably.connection.on { state ->
             when (state.current) {
-                ConnectionState.connected -> gameOn(this)
+                ConnectionState.connected -> {
+                    gameOn(this)
+                }
             }
         }
     }
@@ -52,7 +58,6 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
     suspend fun enter(player: GamePlayer): Result<Unit> {
         return suspendCoroutine { continuation ->
             ably.channels[GLOBAL_CHANNEL_NAME].presence.run {
-                //unable to use this api without data
                 enterClient(player.id, "no data", object : CompletionListener {
                     override fun onSuccess() {
                         scope.launch {
@@ -73,7 +78,7 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
     suspend fun leave(player: GamePlayer): Result<Unit> {
         return suspendCoroutine { continuation ->
             ably.channels[GLOBAL_CHANNEL_NAME].presence.run {
-                leaveClient(player.id, object : CompletionListener {
+                leaveClient(player.id,"no_data", object : CompletionListener {
                     override fun onSuccess() {
                         continuation.resume(Result.success(Unit))
                     }
@@ -82,7 +87,6 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
                         continuation.resume(Result.failure(AblyException.fromErrorInfo(reason)))
                     }
                 })
-
             }
         }
     }
@@ -93,13 +97,12 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
         }
     }
 
-
     fun subscribeToPlayerNumberUpdate(updated: (action: PresenceAction) -> Unit) {
         val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
         ably.channels[GLOBAL_CHANNEL_NAME].presence.subscribe(observedActions) {
             when (it.action) {
-                PresenceMessage.Action.enter -> updated(PresenceAction.ENTER)
-                PresenceMessage.Action.leave -> updated(PresenceAction.LEAVE)
+                PresenceMessage.Action.enter -> updated(PresenceAction.Enter(DefaultGamePlayer(it.clientId)))
+                PresenceMessage.Action.leave -> updated(PresenceAction.Leave(DefaultGamePlayer(it.clientId)))
             }
         }
 

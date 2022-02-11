@@ -96,6 +96,12 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
             continuation.resume(ably.channels[GLOBAL_CHANNEL_NAME].presence.get().size)
         }
     }
+    suspend fun allPlayers(): List<GamePlayer> {
+        return suspendCoroutine { continuation ->
+            val players = ably.channels[GLOBAL_CHANNEL_NAME].presence.get().map { DefaultGamePlayer(it.clientId) }
+            continuation.resume(players)
+        }
+    }
 
     fun subscribeToPlayerNumberUpdate(updated: (action: PresenceAction) -> Unit) {
         val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
@@ -106,5 +112,9 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
             }
         }
 
+    }
+
+    suspend fun isInGame(gamePlayer: GamePlayer): Boolean {
+        return allPlayers().find { it.id == gamePlayer.id } != null
     }
 }

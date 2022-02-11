@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -39,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ablyGame: AblyGame
     private lateinit var gamePlayer: MyGamePlayer
     private lateinit var enterButton: Button
-    private var inGame = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,14 +79,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupEnterButton() {
         enterButton.setOnClickListener {
-            if (inGame) {
-                leaveGame()
-            } else {
-                checkName(this) { name ->
-                    gamePlayer = MyGamePlayer(name)
-                    enterGame()
+            val context = this
+            lifecycleScope.launch {
+                if (ablyGame.isInGame(gamePlayer)) {
+                    leaveGame()
+                } else {
+                    checkName(context) { name ->
+                        gamePlayer = MyGamePlayer(name)
+                        enterGame()
+                    }
                 }
             }
+
         }
     }
 
@@ -96,9 +100,9 @@ class MainActivity : AppCompatActivity() {
             val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
             enterButton.isEnabled = true
             if (leaveResult.isSuccess) {
-                inGame = false
                 Log.d(TAG, "Successful leave")
-
+            } else {
+                Toast.makeText(this@MainActivity, leaveResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
         }
@@ -111,10 +115,9 @@ class MainActivity : AppCompatActivity() {
             val enterResult = ablyGame.enter(gamePlayer)
             enterButton.isEnabled = true
             if (enterResult.isSuccess) {
-                inGame = true
                 Log.d(TAG, "Successful entry")
             } else {
-                Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
+                Toast.makeText(this@MainActivity, enterResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
 
@@ -138,7 +141,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateEnterButton() {
-        enterButton.text = if (inGame) getString(R.string.leave_game) else getString(R.string.enter_game)
+        lifecycleScope.launch {
+            enterButton.text = if (ablyGame.isInGame(gamePlayer)) getString(R.string.leave_game)
+            else getString(R.string.enter_game)
+        }
     }
 
     private fun onRoomTap(gameRoom: GameRoom) {

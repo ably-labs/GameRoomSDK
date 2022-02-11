@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -37,9 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var roomsRecyclerView: RecyclerView
     private lateinit var numberOfPlayersTextView: TextView
     private lateinit var ablyGame: AblyGame
-    private lateinit var gamePlayer: MyGamePlayer
+    private var gamePlayer: MyGamePlayer? = null
     private lateinit var enterButton: Button
-    private var inGame = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,26 +79,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupEnterButton() {
         enterButton.setOnClickListener {
-            if (inGame) {
-                leaveGame()
-            } else {
-                checkName(this) { name ->
-                    gamePlayer = MyGamePlayer(name)
-                    enterGame()
+            val context = this
+            lifecycleScope.launch {
+                if (ablyGame.isInGame(gamePlayer)) {
+                    leaveGame()
+                } else {
+                    checkName(context) { name ->
+                        gamePlayer = MyGamePlayer(name)
+                        enterGame()
+                    }
                 }
             }
+
         }
     }
 
     private fun leaveGame() {
         lifecycleScope.launch {
             enterButton.isEnabled = false
-            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
+            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer!!)
             enterButton.isEnabled = true
             if (leaveResult.isSuccess) {
-                inGame = false
                 Log.d(TAG, "Successful leave")
-
+            } else {
+                Toast.makeText(this@MainActivity, leaveResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
         }
@@ -108,13 +112,12 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             //also register to changes
             enterButton.isEnabled = false
-            val enterResult = ablyGame.enter(gamePlayer)
+            val enterResult = ablyGame.enter(gamePlayer!!)
             enterButton.isEnabled = true
             if (enterResult.isSuccess) {
-                inGame = true
                 Log.d(TAG, "Successful entry")
             } else {
-                Log.e(TAG, "problem entering: ", enterResult.exceptionOrNull())
+                Toast.makeText(this@MainActivity, enterResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
 
@@ -138,16 +141,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateEnterButton() {
-        enterButton.text = if (inGame) getString(R.string.leave_game) else getString(R.string.enter_game)
+        lifecycleScope.launch {
+            enterButton.text = if (ablyGame.isInGame(gamePlayer)) getString(R.string.leave_game)
+            else getString(R.string.enter_game)
+        }
     }
 
     private fun onRoomTap(gameRoom: GameRoom) {
-        Intent(this, GameRoomActivity::class.java).run {
-            val gson = Gson()
-            putExtra(GameRoomActivity.EXTRA_ROOM_JSON, gson.toJson(gameRoom))
-            putExtra(GameRoomActivity.EXTRA_PLAYER_JSON, gson.toJson(gamePlayer))
-            startActivity(this)
+        val context = this
+        lifecycleScope.launch {
+            if (!ablyGame.isInGame(gamePlayer)) {
+                Toast.makeText(context, "You need to enter game first", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            Intent(context, GameRoomActivity::class.java).run {
+                val gson = Gson()
+                putExtra(GameRoomActivity.EXTRA_ROOM_JSON, gson.toJson(gameRoom))
+                putExtra(GameRoomActivity.EXTRA_PLAYER_JSON, gson.toJson(gamePlayer))
+                startActivity(this)
+            }
         }
+
 
     }
 }

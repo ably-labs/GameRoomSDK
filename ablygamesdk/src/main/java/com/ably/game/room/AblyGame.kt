@@ -114,7 +114,8 @@ class AblyGame private constructor(apiKey: String, val scope: CoroutineScope, ga
 
     }
 
-    suspend fun isInGame(gamePlayer: GamePlayer): Boolean {
+    suspend fun isInGame(gamePlayer: GamePlayer?): Boolean {
+        if (gamePlayer == null) return false
         return allPlayers().find { it.id == gamePlayer.id } != null
     }
 }

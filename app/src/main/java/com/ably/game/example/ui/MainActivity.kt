@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var roomsRecyclerView: RecyclerView
     private lateinit var numberOfPlayersTextView: TextView
     private lateinit var ablyGame: AblyGame
-    private lateinit var gamePlayer: MyGamePlayer
+    private var gamePlayer: MyGamePlayer? = null
     private lateinit var enterButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     private fun leaveGame() {
         lifecycleScope.launch {
             enterButton.isEnabled = false
-            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer)
+            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer!!)
             enterButton.isEnabled = true
             if (leaveResult.isSuccess) {
                 Log.d(TAG, "Successful leave")
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             //also register to changes
             enterButton.isEnabled = false
-            val enterResult = ablyGame.enter(gamePlayer)
+            val enterResult = ablyGame.enter(gamePlayer!!)
             enterButton.isEnabled = true
             if (enterResult.isSuccess) {
                 Log.d(TAG, "Successful entry")

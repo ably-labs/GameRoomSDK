@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryOwner
 import com.ably.game.room.EnterRoomResult
+import com.ably.game.room.GameMessage
 import com.ably.game.room.GamePlayer
 import com.ably.game.room.GameRoom
 import com.ably.game.room.GameRoomController
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 private const val TAG = "GameRoomViewModel"
+
 class GameRoomViewModel(private val controller: GameRoomController) : ViewModel() {
     //following needs to be transformed from flows, they need not to be exposed like this
     private val _presenceActions = MutableLiveData<RoomPresenceUpdate>()
@@ -45,7 +47,7 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
         viewModelScope.launch {
             _leaveResult.value = controller.leave(who, which)
             //also manually unsubscribe
-            controller.unregisterFromRoomMessages(which,who)
+            controller.unregisterFromRoomMessages(which, who)
 
             if (_leaveResult.value is LeaveRoomResult) {
                 _allPlayers.value = controller.allPlayers(which)
@@ -72,7 +74,7 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
         which: GameRoom,
         who: GamePlayer
     ) {
-        controller.registerToPresenceEvents(which).collect{
+        controller.registerToPresenceEvents(which).collect {
             Log.d(TAG, "buildPresenceFlow: presence flow collect")
             _presenceActions.value = it
             //also refresh users again
@@ -99,7 +101,8 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
 
     fun sendTextMessage(who: GamePlayer, toWhom: GamePlayer, message: String) {
         viewModelScope.launch {
-            _messageSentResult.value = controller.sendMessageToPlayer(who, toWhom, message)
+            _messageSentResult.value =
+                controller.sendMessageToPlayer(who, toWhom, GameMessage(messageContent = message))
         }
     }
 }

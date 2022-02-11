@@ -105,7 +105,7 @@ class GameRoomActivity : AppCompatActivity() {
 
     private fun listenToTheFlow() {
         viewModel.receivedMessages.observe(this) {
-            someoneSentMessage(it.from,it.message)
+            someoneSentMessage(it.from,it.message.messageContent)
         }
     }
 

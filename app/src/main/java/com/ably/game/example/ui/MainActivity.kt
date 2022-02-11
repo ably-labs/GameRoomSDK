@@ -148,12 +148,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onRoomTap(gameRoom: GameRoom) {
-        Intent(this, GameRoomActivity::class.java).run {
-            val gson = Gson()
-            putExtra(GameRoomActivity.EXTRA_ROOM_JSON, gson.toJson(gameRoom))
-            putExtra(GameRoomActivity.EXTRA_PLAYER_JSON, gson.toJson(gamePlayer))
-            startActivity(this)
+        val context = this
+        lifecycleScope.launch {
+            if (!ablyGame.isInGame(gamePlayer)) {
+                Toast.makeText(context, "You need to enter game first", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            Intent(context, GameRoomActivity::class.java).run {
+                val gson = Gson()
+                putExtra(GameRoomActivity.EXTRA_ROOM_JSON, gson.toJson(gameRoom))
+                putExtra(GameRoomActivity.EXTRA_PLAYER_JSON, gson.toJson(gamePlayer))
+                startActivity(this)
+            }
         }
+
 
     }
 }

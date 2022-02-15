@@ -48,9 +48,10 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
     }
     private val ably: AblyRealtime = AblyRealtime(clientOptions)
     val roomsController: GameRoomController = GameRoomControllerImpl(ably)
-    private var isActive = false
 
-    enum class GameState { Started, Stopped }
+    enum class GameState { Idle, Started, Stopped }
+
+    private var gameState = GameState.Idle
 
     suspend fun start(): Flow<GameState> {
         return suspendCoroutine { continuation ->
@@ -58,12 +59,12 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
                 ably.connection.on { state ->
                     when (state.current) {
                         ConnectionState.connected -> {
-                            isActive = true
+                            gameState = GameState.Started
                             trySend(GameState.Started)
                             System.out.println("Ably Game Started")
                         }
                         ConnectionState.closed -> {
-                            isActive = false
+                            gameState = GameState.Stopped
                             trySend(GameState.Stopped)
                             System.out.println("Ably Game stopped")
 
@@ -71,9 +72,8 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
                         //other states are currently not of our interests
                     }
                 }
-                if (!isActive){
-                    ably.connect()
-                }
+                ably.connect()
+
                 awaitClose { cancel() }
             }
             continuation.resume(flow)
@@ -82,7 +82,7 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
     }
 
     fun stop() {
-        if (isActive){
+        if (gameState == GameState.Started) {
             ably.close()
         }
     }
@@ -90,8 +90,8 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
     //enter game --global
     suspend fun enter(player: GamePlayer): Result<Unit> {
         //first make sure the game has started
-        if (!isActive) {
-            return Result.failure(IllegalStateException("enter failed as AblyGame has not started yet"))
+        if (!isActive()) {
+            return Result.failure(IllegalStateException("enter failed as AblyGame is not started"))
         }
         return suspendCoroutine { continuation ->
             ably.channels[GLOBAL_CHANNEL_NAME].presence.run {
@@ -112,6 +112,8 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
+    private fun isActive() = gameState == GameState.Started
+
     suspend fun leave(player: GamePlayer): Result<Unit> {
         return suspendCoroutine { continuation ->
             ably.channels[GLOBAL_CHANNEL_NAME].presence.run {
@@ -130,7 +132,7 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
 
     suspend fun numberOfPlayers(): Int {
         return suspendCoroutine { continuation ->
-            if (isActive) {
+            if (isActive()) {
                 continuation.resume(ably.channels[GLOBAL_CHANNEL_NAME].presence.get().size)
             } else {
                 continuation.resume(0)//maybe we should signal non-active state but let's leave it to this for now
@@ -140,7 +142,7 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
 
     suspend fun allPlayers(): List<GamePlayer> {
         return suspendCoroutine { continuation ->
-            if (isActive) {
+            if (isActive()) {
                 val players = ably.channels[GLOBAL_CHANNEL_NAME].presence.get().map { DefaultGamePlayer(it.clientId) }
                 continuation.resume(players)
             } else {
@@ -150,20 +152,24 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
-    fun subscribeToPlayerNumberUpdate(updated: (action: PresenceAction) -> Unit) {
-        if (!isActive) return
-        val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
-        ably.channels[GLOBAL_CHANNEL_NAME].presence.subscribe(observedActions) {
-            when (it.action) {
-                PresenceMessage.Action.enter -> updated(PresenceAction.Enter(DefaultGamePlayer(it.clientId)))
-                PresenceMessage.Action.leave -> updated(PresenceAction.Leave(DefaultGamePlayer(it.clientId)))
+    suspend fun subscribeToGamePlayerUpdates(): Flow<PresenceAction> {
+        return suspendCoroutine { continuation ->
+            val flow = callbackFlow {
+                val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
+                ably.channels[GLOBAL_CHANNEL_NAME].presence.subscribe(observedActions) {
+                    when (it.action) {
+                        PresenceMessage.Action.enter -> trySend(PresenceAction.Enter(DefaultGamePlayer(it.clientId)))
+                        PresenceMessage.Action.leave -> trySend(PresenceAction.Leave(DefaultGamePlayer(it.clientId)))
+                    }
+                }
+                awaitClose { cancel() }
             }
+            continuation.resume(flow)
         }
-
     }
 
     suspend fun isInGame(gamePlayer: GamePlayer?): Boolean {
-        if (!isActive) return false
+        if (!isActive()) return false
         if (gamePlayer == null) return false
         return allPlayers().find { it.id == gamePlayer.id } != null
     }

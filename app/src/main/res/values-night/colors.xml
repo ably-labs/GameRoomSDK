@@ -8,5 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="person_bg">#FFC107</color>
-    <color name="cardview_bg">#BF40C4FF</color>
+    <color name="cardview_bg">@color/cardview_dark_background</color>
 </resources>

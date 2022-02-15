@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/cardview_dark_background"
+    android:background="@color/cardview_bg"
     android:layout_margin="16dp"
+    app:layout_constraintCircleRadius="8dp"
     android:minHeight="200dp"
     android:minWidth="200dp">
 
@@ -19,5 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5"
+        android:textSize="16sp"
+        android:textStyle="bold"
         tools:text="My nice room" />
 </androidx.constraintlayout.widget.ConstraintLayout>

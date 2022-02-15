@@ -143,8 +143,8 @@ internal class GameRoomControllerImpl(
     override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
-                allPlayers(room)
-                    .filter { receiver != it } //do not create a channel between self-self
+                val allPlayers = allPlayers(room)
+                    allPlayers.filter {player -> receiver.id != player.id } //do not create a channel between self-self
                     .forEach { from ->
                         val channelId = unidirectionalPlayerChannel(from, receiver)
                         System.out.println("Registering to channel $channelId")

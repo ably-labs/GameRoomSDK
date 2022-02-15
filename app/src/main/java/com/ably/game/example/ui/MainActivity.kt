@@ -70,13 +70,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateNumberOfPlayers() {
-        lifecycleScope.launch {
-            val numberOfPlayers = ablyGame.numberOfPlayers()
-            numberOfPlayersTextView.text = "${numberOfPlayers} players"
-        }
-    }
-
     private fun setupEnterButton() {
         enterButton.setOnClickListener {
             val context = this
@@ -120,14 +113,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, enterResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
-
-
         }
     }
 
-    private fun subscribeToGameEvents() {
-        ablyGame.subscribeToPlayerNumberUpdate {
-            //you can either update numbers here or pull numberOfPlayers
+    private suspend fun subscribeToGameEvents() {
+        ablyGame.subscribeToGamePlayerUpdates().collect {
             when (it) {
                 is PresenceAction.Enter -> {
                     Log.d(TAG, "PresenceAction.Enter ${it.player.id}")
@@ -137,6 +127,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             updateNumberOfPlayers()
+        }
+    }
+
+    private fun updateNumberOfPlayers() {
+        lifecycleScope.launch {
+            val numberOfPlayers = ablyGame.numberOfPlayers()
+            numberOfPlayersTextView.text = "${numberOfPlayers} players"
         }
     }
 
@@ -161,7 +158,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(this)
             }
         }
-
 
     }
 }

@@ -120,8 +120,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, enterResult.exceptionOrNull().toString(), Toast.LENGTH_SHORT).show()
             }
             updateEnterButton()
-
-
         }
     }
 
@@ -161,7 +159,6 @@ class MainActivity : AppCompatActivity() {
                 startActivity(this)
             }
         }
-
 
     }
 }

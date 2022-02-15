@@ -10,6 +10,7 @@ import com.ably.game.room.GameRoom
 import com.ably.game.room.GameRoomController
 import com.ably.game.room.LeaveRoomResult
 import com.ably.game.room.MessageSentResult
+import com.ably.game.room.MessageType
 import com.ably.game.room.ReceivedMessage
 import com.ably.game.room.RoomPresenceResult
 import com.ably.game.room.RoomPresenceUpdate
@@ -94,7 +95,7 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
         which: GameRoom,
         who: GamePlayer
     ) {
-        controller.registerToRoomMessages(which, who).collect {
+        controller.registerToRoomMessages(which, who, MessageType.TEXT).collect {
             _receivedMessages.value = it
         }
     }

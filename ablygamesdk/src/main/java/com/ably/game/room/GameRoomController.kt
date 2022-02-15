@@ -47,7 +47,7 @@ interface GameRoomController {
         message: GameMessage
     ): MessageSentResult
 
-    suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage>
+    suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer, messageType: MessageType): Flow<ReceivedMessage>
     suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
@@ -121,13 +121,12 @@ internal class GameRoomControllerImpl(
 
     override suspend fun sendMessageToPlayer(from: GamePlayer, to: GamePlayer, message: GameMessage):
             MessageSentResult {
-        //construct this message from GameMessage
-        val message = message.ablyMessage(from.id) // Message("text", message, from.id)
-        //this should be a bidirectional channel between two players
+        val ablyMessage = message.ablyMessage(from.id)
         val channelId = unidirectionalPlayerChannel(from, to)
+        println("Sending message over $channelId")
         return suspendCoroutine { continuation ->
             ably.channels[channelId]
-                .publish(message, object : CompletionListener {
+                .publish(ablyMessage, object : CompletionListener {
                     override fun onSuccess() {
                         continuation.resume(MessageSentResult.Success(to))
                     }
@@ -140,7 +139,7 @@ internal class GameRoomControllerImpl(
 
     }
 
-    override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer): Flow<ReceivedMessage> {
+    override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer, messageType: MessageType): Flow<ReceivedMessage> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 val allPlayers = allPlayers(room)
@@ -148,7 +147,7 @@ internal class GameRoomControllerImpl(
                     .forEach { from ->
                         val channelId = unidirectionalPlayerChannel(from, receiver)
                         System.out.println("Registering to channel $channelId")
-                        ably.channels[channelId].subscribe("text") { message ->
+                        ably.channels[channelId].subscribe(messageType.toString()) { message ->
                             println("Messaged received from ${from.id}")
                             trySend(ReceivedMessage(from, message.gameMessage()))
                         }

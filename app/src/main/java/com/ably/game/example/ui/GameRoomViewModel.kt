@@ -27,8 +27,11 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
 
     //
     //following needs to be transformed from flows, they need not to be exposed like this
-    private val _receivedMessages = MutableLiveData<ReceivedMessage>()
-    val receivedMessages: LiveData<ReceivedMessage> = _receivedMessages
+    private val _receivedUserMessages = MutableLiveData<ReceivedMessage>()
+    val receivedUserMessages: LiveData<ReceivedMessage> = _receivedUserMessages
+
+    private val _receivedRoomMessages = MutableLiveData<ReceivedMessage>()
+    val receivedRoomMessages: LiveData<ReceivedMessage> = _receivedRoomMessages
 
     private val _leaveResult = MutableLiveData<LeaveRoomResult>()
     val leaveResult: LiveData<LeaveRoomResult> = _leaveResult
@@ -95,8 +98,15 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
         which: GameRoom,
         who: GamePlayer
     ) {
-        controller.registerToPlayerMessagesInRoom(which, who, MessageType.TEXT).collect {
-            _receivedMessages.value = it
+        viewModelScope.launch {
+            controller.registerToPlayerMessagesInRoom(which, who, MessageType.TEXT).collect {
+                _receivedUserMessages.value = it
+            }
+        }
+        viewModelScope.launch {
+            controller.registerToRoomMessages(which,MessageType.TEXT).collect{
+                _receivedRoomMessages.value = it
+            }
         }
     }
 
@@ -104,6 +114,13 @@ class GameRoomViewModel(private val controller: GameRoomController) : ViewModel(
         viewModelScope.launch {
             _messageSentResult.value =
                 controller.sendMessageToPlayer(who, toWhom, GameMessage(messageContent = message))
+        }
+    }
+
+    fun sendMessageToRoom(player: GamePlayer, room: GameRoom, message: String) {
+        viewModelScope.launch {
+            // _messageSentResult.value =
+            controller.sendMessageToRoom(player, room, GameMessage(messageContent = message))
         }
     }
 }

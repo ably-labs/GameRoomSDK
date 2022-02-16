@@ -54,6 +54,9 @@ class GameRoomActivity : AppCompatActivity() {
             viewModel.leaveRoom(player, room)
         }
 
+        findViewById<Button>(R.id.sayHiButton).setOnClickListener {
+            viewModel.sendMessageToRoom(player, room, "Hi \uD83D\uDC4B")
+        }
     }
 
     private fun sendMessageTo(toPlayer: GamePlayer) {
@@ -115,7 +118,10 @@ class GameRoomActivity : AppCompatActivity() {
     }
 
     private fun listenToTheFlow() {
-        viewModel.receivedMessages.observe(this) {
+        viewModel.receivedUserMessages.observe(this) {
+            someoneSentMessage(it.from, it.message.messageContent)
+        }
+        viewModel.receivedRoomMessages.observe(this){
             someoneSentMessage(it.from, it.message.messageContent)
         }
     }

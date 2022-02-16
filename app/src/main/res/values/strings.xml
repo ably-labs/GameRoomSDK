@@ -3,7 +3,10 @@
     <string name="your_name">Your name?</string>
     <string name="submit">Submit</string>
     <string name="leave">Leave</string>
-    <string name="say_hi">Say hi</string>
+    <string name="say_hi">👋</string>
     <string name="enter_game">Enter game</string>
     <string name="leave_game">Leave game</string>
+    <string name="message">Message</string>
+    <string name="sendMessageTo">What do you want to say to %s</string>
+    <string name="sendMessageTo_title">Send message to %s</string>
 </resources>

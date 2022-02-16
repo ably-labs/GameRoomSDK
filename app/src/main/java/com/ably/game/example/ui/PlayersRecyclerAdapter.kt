@@ -12,7 +12,8 @@ import com.ably.game.example.ui.checkName
 
 
 class PlayersRecyclerAdapter(
-    private val onSayHi: (player: GamePlayer) -> Unit
+    private val onSayHi: (player: GamePlayer) -> Unit,
+    private val onRequestSendMessageTo:(player: GamePlayer) -> Unit
 ) : RecyclerView.Adapter<PlayersRecyclerAdapter.ViewHolder>() {
     private val players = mutableListOf<GamePlayer>()
     fun setPlayers(list: List<GamePlayer>) {
@@ -31,9 +32,12 @@ class PlayersRecyclerAdapter(
         checkName(holder.itemView.context) {
             if (players[position].id != it) {
                 holder.sayHiButton.visibility = View.VISIBLE
+                holder.sendMessageButton.visibility = View.VISIBLE
                 holder.sayHiButton.setOnClickListener { onSayHi(players[position]) }
+                holder.sendMessageButton.setOnClickListener { onRequestSendMessageTo(players[position]) }
             } else {
                 holder.sayHiButton.visibility = View.GONE
+                holder.sendMessageButton.visibility = View.GONE
                 holder.personTextView.append(" (you)")
             }
         }
@@ -43,5 +47,6 @@ class PlayersRecyclerAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val personTextView: TextView = view.findViewById(R.id.personTextView)
         val sayHiButton: Button = view.findViewById(R.id.sayHiButton)
+        val sendMessageButton:Button = view.findViewById(R.id.sendMessageButton)
     }
 }

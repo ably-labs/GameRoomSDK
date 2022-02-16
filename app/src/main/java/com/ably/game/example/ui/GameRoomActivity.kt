@@ -16,6 +16,7 @@ import com.ably.game.room.RoomPresenceUpdate
 import com.ably.game.example.MultiplayerGameApp
 import com.ably.game.example.MyGamePlayer
 import com.ably.game.example.MyGameRoom
+import com.ably.game.example.ui.showSendMessageDialog
 import com.ablylabs.multiplayergame.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
@@ -36,7 +37,7 @@ class GameRoomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game_room)
         playersRecyclerView = findViewById(R.id.playersRecyclerView)
-        playersAdapter = PlayersRecyclerAdapter(this::sayHiTo)
+        playersAdapter = PlayersRecyclerAdapter(this::sayHiTo, this::sendMessageTo)
         setupObservers()
         intent.extras?.let { bundle ->
             bundle.getString(EXTRA_ROOM_JSON)?.let {
@@ -53,6 +54,16 @@ class GameRoomActivity : AppCompatActivity() {
             viewModel.leaveRoom(player, room)
         }
 
+    }
+
+    private fun sendMessageTo(toPlayer: GamePlayer) {
+        showSendMessageDialog(this, toPlayer) { messageText ->
+            viewModel.sendTextMessage(player, toPlayer, messageText)
+        }
+    }
+
+    private fun sayHiTo(to: GamePlayer) {
+        viewModel.sendTextMessage(player, to, "Hi \uD83D\uDC4B")
     }
 
     private fun setupObservers() {
@@ -105,7 +116,7 @@ class GameRoomActivity : AppCompatActivity() {
 
     private fun listenToTheFlow() {
         viewModel.receivedMessages.observe(this) {
-            someoneSentMessage(it.from,it.message.messageContent)
+            someoneSentMessage(it.from, it.message.messageContent)
         }
     }
 
@@ -116,12 +127,6 @@ class GameRoomActivity : AppCompatActivity() {
             "${who.id} : ${message}",
             Snackbar.LENGTH_LONG
         ).show()
-    }
-
-
-
-    private fun sayHiTo(to: GamePlayer) {
-        viewModel.sendTextMessage(player, to, "Hi \uD83D\uDC4B")
     }
 
     override fun onBackPressed() {

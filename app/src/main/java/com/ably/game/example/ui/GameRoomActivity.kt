@@ -122,7 +122,11 @@ class GameRoomActivity : AppCompatActivity() {
             someoneSentMessage(it.from, it.message.messageContent)
         }
         viewModel.receivedRoomMessages.observe(this){
-            someoneSentMessage(it.from, it.message.messageContent)
+            //exclude yourself
+            if (it.from.id != player.id){
+                //also prepend something to say this is a global message 📢
+                someoneSentMessage(it.from, "\uD83D\uDCE2 ${it.message.messageContent}")
+            }
         }
     }
 

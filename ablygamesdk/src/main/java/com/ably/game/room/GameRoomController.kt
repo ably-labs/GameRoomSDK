@@ -53,13 +53,19 @@ interface GameRoomController {
         message: GameMessage
     ): MessageSentResult
 
-    suspend fun registerToRoomMessages(
+    suspend fun registerToPlayerMessagesInRoom(
         room: GameRoom,
         receiver: GamePlayer,
         messageType: MessageType
     ): Flow<ReceivedMessage>
 
-    suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit>
+    //register to messages sent to room
+    suspend fun registerToRoomMessages(
+        room: GameRoom,
+        messageType: MessageType
+    ): Flow<ReceivedMessage>
+
+    suspend fun unregisterFromPlayerMessagesInRoom(room: GameRoom, receiver: GamePlayer): Result<Unit>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
@@ -67,14 +73,10 @@ interface GameRoomController {
 
 internal const val roomNamespace = "room"
 internal const val playerNamespace = "player"
-internal const val playerToRoomNamespace = "player-room"
+
 internal fun roomChannel(gameRoom: GameRoom) = "$roomNamespace:${gameRoom.id}"
 internal fun unidirectionalPlayerChannel(player1: GamePlayer, player2: GamePlayer): String {
     return "$playerNamespace:${player1.id}-${player2.id}"
-}
-
-internal fun playerToRoomChannel(player: GamePlayer, gameRoom: GameRoom): String {
-    return "$playerToRoomNamespace:${player.id}-${gameRoom.id}"
 }
 
 internal class GameRoomControllerImpl(
@@ -137,7 +139,7 @@ internal class GameRoomControllerImpl(
 
     override suspend fun sendMessageToRoom(from: GamePlayer, to: GameRoom, message: GameMessage): MessageSentResult {
         val ablyMessage = message.ablyMessage(from.id)
-        val channelId = playerToRoomChannel(from, to)
+        val channelId = roomChannel(to)
         println("Sending message over $channelId")
         return suspendCoroutine { continuation ->
             ably.channels[channelId]
@@ -185,7 +187,22 @@ internal class GameRoomControllerImpl(
 
     }
 
-    override suspend fun registerToRoomMessages(
+    override suspend fun registerToRoomMessages(room: GameRoom, messageType: MessageType): Flow<ReceivedMessage> {
+        return suspendCoroutine { continuation ->
+            val flow = callbackFlow {
+                val channelId = roomChannel(room)
+                System.out.println("Registering to channel $channelId")
+                ably.channels[channelId].subscribe(messageType.toString()) { message ->
+                    println("Messaged received from ${message.clientId}")
+                    trySend(ReceivedMessage(DefaultGamePlayer(message.clientId), message.gameMessage()))
+                }
+                awaitClose { cancel() }
+            }
+            continuation.resume(flow)
+        }
+    }
+
+    override suspend fun registerToPlayerMessagesInRoom(
         room: GameRoom,
         receiver: GamePlayer,
         messageType: MessageType
@@ -209,7 +226,7 @@ internal class GameRoomControllerImpl(
 
     }
 
-    override suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit> {
+    override suspend fun unregisterFromPlayerMessagesInRoom(room: GameRoom, receiver: GamePlayer): Result<Unit> {
         val allPlayers = allPlayers(room)
         return suspendCoroutine { continuation ->
             allPlayers.filter { receiver != it } //do not create a channel between self-self

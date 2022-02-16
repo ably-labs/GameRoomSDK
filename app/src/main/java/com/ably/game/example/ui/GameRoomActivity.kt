@@ -87,12 +87,12 @@ class GameRoomActivity : AppCompatActivity() {
         viewModel.messageSentResult.observe(this) {
             when (it) {
                 is MessageSentResult.Failed -> Toast.makeText(
-                    this, "Couldn't send message to ${it.toWhom.id}", Toast
+                    this, "Couldn't send message to ${it.toWhom?.id}", Toast
                         .LENGTH_SHORT
                 )
                     .show()
                 is MessageSentResult.Success -> Toast.makeText(
-                    this, "Message sent to ${it.toWhom.id}", Toast
+                    this, "Message sent to ${it.toWhom?.id}", Toast
                         .LENGTH_SHORT
                 )
                     .show()

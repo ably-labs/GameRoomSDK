@@ -24,8 +24,9 @@ typealias LeaveRoomResult = RoomPresenceResult
 typealias EnterRoomResult = RoomPresenceResult
 
 sealed class MessageSentResult {
-    data class Success(val toWhom: GamePlayer) : MessageSentResult()
-    data class Failed(val toWhom: GamePlayer, val exception: Exception?) : MessageSentResult()
+    data class Success(val toWhom: GamePlayer? = null, val toWhere: GameRoom? = null) : MessageSentResult()
+    data class Failed(val toWhom: GamePlayer? = null, val toWhere: GameRoom? = null, val exception: Exception?) :
+        MessageSentResult()
 }
 
 data class ReceivedMessage(val from: GamePlayer, val message: GameMessage)
@@ -40,14 +41,24 @@ interface GameRoomController {
     suspend fun enter(player: GamePlayer, gameRoom: GameRoom): EnterRoomResult
     suspend fun leave(player: GamePlayer, gameRoom: GameRoom): LeaveRoomResult
 
-    //consider migrating message
     suspend fun sendMessageToPlayer(
         from: GamePlayer,
         to: GamePlayer,
         message: GameMessage
     ): MessageSentResult
 
-    suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer, messageType: MessageType): Flow<ReceivedMessage>
+    suspend fun sendMessageToRoom(
+        from: GamePlayer,
+        to: GameRoom,
+        message: GameMessage
+    ): MessageSentResult
+
+    suspend fun registerToRoomMessages(
+        room: GameRoom,
+        receiver: GamePlayer,
+        messageType: MessageType
+    ): Flow<ReceivedMessage>
+
     suspend fun unregisterFromRoomMessages(room: GameRoom, receiver: GamePlayer): Result<Unit>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
     suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
@@ -56,9 +67,14 @@ interface GameRoomController {
 
 internal const val roomNamespace = "room"
 internal const val playerNamespace = "player"
+internal const val playerToRoomNamespace = "player-room"
 internal fun roomChannel(gameRoom: GameRoom) = "$roomNamespace:${gameRoom.id}"
 internal fun unidirectionalPlayerChannel(player1: GamePlayer, player2: GamePlayer): String {
     return "$playerNamespace:${player1.id}-${player2.id}"
+}
+
+internal fun playerToRoomChannel(player: GamePlayer, gameRoom: GameRoom): String {
+    return "$playerToRoomNamespace:${player.id}-${gameRoom.id}"
 }
 
 internal class GameRoomControllerImpl(
@@ -119,6 +135,31 @@ internal class GameRoomControllerImpl(
         }
     }
 
+    override suspend fun sendMessageToRoom(from: GamePlayer, to: GameRoom, message: GameMessage): MessageSentResult {
+        val ablyMessage = message.ablyMessage(from.id)
+        val channelId = playerToRoomChannel(from, to)
+        println("Sending message over $channelId")
+        return suspendCoroutine { continuation ->
+            ably.channels[channelId]
+                .publish(ablyMessage, object : CompletionListener {
+                    override fun onSuccess() {
+                        continuation.resume(MessageSentResult.Success(toWhere = to))
+                    }
+
+                    override fun onError(reason: ErrorInfo?) {
+                        continuation.resume(
+                            MessageSentResult.Failed(
+                                toWhere = to,
+                                exception = AblyException
+                                    .fromErrorInfo
+                                        (reason)
+                            )
+                        )
+                    }
+                })
+        }
+    }
+
     override suspend fun sendMessageToPlayer(from: GamePlayer, to: GamePlayer, message: GameMessage):
             MessageSentResult {
         val ablyMessage = message.ablyMessage(from.id)
@@ -132,18 +173,27 @@ internal class GameRoomControllerImpl(
                     }
 
                     override fun onError(reason: ErrorInfo?) {
-                        continuation.resume(MessageSentResult.Failed(to, AblyException.fromErrorInfo(reason)))
+                        continuation.resume(
+                            MessageSentResult.Failed(
+                                toWhom = to, exception = AblyException
+                                    .fromErrorInfo(reason)
+                            )
+                        )
                     }
                 })
         }
 
     }
 
-    override suspend fun registerToRoomMessages(room: GameRoom, receiver: GamePlayer, messageType: MessageType): Flow<ReceivedMessage> {
+    override suspend fun registerToRoomMessages(
+        room: GameRoom,
+        receiver: GamePlayer,
+        messageType: MessageType
+    ): Flow<ReceivedMessage> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 val allPlayers = allPlayers(room)
-                    allPlayers.filter {player -> receiver.id != player.id } //do not create a channel between self-self
+                allPlayers.filter { player -> receiver.id != player.id } //do not create a channel between self-self
                     .forEach { from ->
                         val channelId = unidirectionalPlayerChannel(from, receiver)
                         System.out.println("Registering to channel $channelId")

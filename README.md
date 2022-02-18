@@ -51,3 +51,15 @@ You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably das
  for that matter could be defined as
  ```val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)```
 
+ ## Starting a game
+
+```kotlinlang
+ ablyGame.start {
+            when(it){
+                AblyGame.GameState.Started -> //TODO replace this with your action of game started
+                AblyGame.GameState.Stopped -> //TODO replace this with your action of game stopped
+            }
+        }
+```
+As you can see this method accepts a ```FlowCollector<GameState>``` for you to observe the changes on game state. You
+ should make sure that the game is started before moving forward with other game functionalities

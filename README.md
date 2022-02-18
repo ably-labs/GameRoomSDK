@@ -39,7 +39,7 @@ should be able to use it any Kotlin project by adding checking it out and adding
 ## Game environment initialisation
 You will need to initialise a game environment in order to activate SDK functionality
 
-```
+```kotlinlang
  val ablyGame = AblyGame.Builder(ABLY_API_KEY)
             .scope(GAME_SCOPE)
             .build()

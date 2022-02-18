@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateNumberOfPlayers() {
         lifecycleScope.launch {
-            val numberOfPlayers = ablyGame.numberOfPlayers()
+            val numberOfPlayers = ablyGame.allPlayers().size
             numberOfPlayersTextView.text = "${numberOfPlayers} players"
         }
     }

@@ -137,16 +137,6 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
-    suspend fun numberOfPlayers(): Int {
-        return suspendCoroutine { continuation ->
-            if (isActive()) {
-                continuation.resume(ably.channels[GLOBAL_CHANNEL_NAME].presence.get().size)
-            } else {
-                continuation.resume(0)//maybe we should signal non-active state but let's leave it to this for now
-            }
-        }
-    }
-
     suspend fun allPlayers(): List<GamePlayer> {
         return suspendCoroutine { continuation ->
             if (isActive()) {

@@ -62,4 +62,19 @@ You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably das
         }
 ```
 As you can see this method accepts a ```FlowCollector<GameState>``` for you to observe the changes on game state. You
- should make sure that the game is started before moving forward with other game functionalities
+should make sure that the game is started before moving forward with other game functionalities
+
+## Enter a game
+
+```
+someCoroutineScope.launch {
+            val enterResult = ablyGame.enter(gamePlayer)
+            if (enterResult.isSuccess) {
+               //enter successful
+            } else {
+               //enter failed
+            }
+        }
+```
+As you can see, you should invoke ```enter``` inside a coroutine scope.
+You must replace ```gamePlayer``` with your own instance of ```GamePlayer```

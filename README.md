@@ -36,3 +36,18 @@ should be able to use it any Kotlin project by adding checking it out and adding
 
 //TODO add some more info about how to setup the library
 
+## Game environment initialisation
+You will need to initialise a game environment in order to activate SDK functionality
+
+```
+ val ablyGame = AblyGame.Builder(ABLY_API_KEY)
+            .scope(GAME_SCOPE)
+            .build()
+
+```
+You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably dashboard](https://ably.com/login) to retrieve
+ your own api key.
+ ```GAME_SCOPE``` is coroutine scope that you intend to run your AblyGame instance in. A Typical application scope
+ for that matter could be defined as
+ ```val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)```
+

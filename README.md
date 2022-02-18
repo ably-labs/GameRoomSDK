@@ -114,3 +114,12 @@ If you want to observe users entering / leaving a game, you can use the followin
             }
         }
 ```
+
+#### Get list of all players
+You can get a list of all players in the game using the following code block
+```
+ coroutineScope.launch {
+            val players = ablyGame.allPlayers()
+       }
+```
+As ```allPlayers``` is a suspending function, you must call this from a coroutine scope

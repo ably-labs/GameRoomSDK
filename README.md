@@ -98,3 +98,19 @@ You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
 ```
 You must replace ```someCoroutineScope``` with scope your are launching the function.
 You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
+
+#### Subscribing to game player updates in the game
+If you want to observe users entering / leaving a game, you can use the following example code
+
+```kotlinlang
+ ablyGame.subscribeToGamePlayerUpdates {
+            when (it) {
+                is PresenceAction.Enter -> {
+                    Log.d(TAG, "PresenceAction.Enter ${it.player.id}")
+                }
+                is PresenceAction.Leave -> {
+                    Log.d(TAG, "PresenceAction.Leave ${it.player.id}")
+                }
+            }
+        }
+```

@@ -78,3 +78,18 @@ someCoroutineScope.launch {
 ```
 As you can see, you should invoke ```enter``` inside a coroutine scope.
 You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
+
+## Leave a game
+
+```kotlinlang
+  someCoroutineScope.launch {
+            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer!!)
+            if (leaveResult.isSuccess) {
+                //leave successful
+            } else {
+               //leave failed
+            }
+        }
+        ```
+You must replace ```someCoroutineScope``` with scope your are launching the function.
+You must replace ```gamePlayer``` with your own instance of ```GamePlayer```

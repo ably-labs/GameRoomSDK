@@ -123,3 +123,11 @@ You can get a list of all players in the game using the following code block
        }
 ```
 As ```allPlayers``` is a suspending function, you must call this from a coroutine scope
+
+#### Check if a player is in a game
+```
+  coroutineScope.launch {
+            if (ablyGame.isInGame(gamePlayer)) {
+               //do something
+            }
+```

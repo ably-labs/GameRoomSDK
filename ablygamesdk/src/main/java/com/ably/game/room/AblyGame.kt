@@ -12,7 +12,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.coroutines.resume
@@ -53,7 +55,13 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
 
     private var gameState = GameState.Idle
 
-    suspend fun start(): Flow<GameState> {
+    fun start(collector: FlowCollector<GameState>) {
+        scope.launch {
+            startSuspending().collect(collector)
+        }
+    }
+
+    private suspend fun startSuspending(): Flow<GameState> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 ably.connection.on { state ->

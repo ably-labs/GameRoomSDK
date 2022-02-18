@@ -36,11 +36,11 @@ should be able to use it any Kotlin project by adding checking it out and adding
 
 //TODO add some more info about how to setup the library
 
- ## Global game related functions
+ ### Global game related functions
 
  Following are examples of functions that are provided by ```AblyGame```
 
-### Game environment initialisation
+#### Game environment initialisation
 You will need to initialise a game environment in order to activate SDK functionality
 
 ```kotlinlang
@@ -56,7 +56,7 @@ You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably das
  ```val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)```
 
 
- ### Start a game
+ #### Start a game
 
 ```kotlinlang
  ablyGame.start {
@@ -69,7 +69,7 @@ You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably das
 As you can see this method accepts a ```FlowCollector<GameState>``` for you to observe the changes on game state. You
 should make sure that the game is started before moving forward with other game functionalities
 
-### Enter a game
+#### Enter a game
 
 ```
 someCoroutineScope.launch {
@@ -84,7 +84,7 @@ someCoroutineScope.launch {
 As you can see, you should invoke ```enter``` inside a coroutine scope.
 You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
 
-### Leave a game
+#### Leave a game
 
 ```kotlinlang
   someCoroutineScope.launch {
@@ -95,6 +95,6 @@ You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
                //leave failed
             }
         }
-        ```
+```
 You must replace ```someCoroutineScope``` with scope your are launching the function.
 You must replace ```gamePlayer``` with your own instance of ```GamePlayer```

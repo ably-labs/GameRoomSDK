@@ -116,8 +116,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun subscribeToGameEvents() {
-        ablyGame.subscribeToGamePlayerUpdates().collect {
+    private fun subscribeToGameEvents() {
+        ablyGame.subscribeToGamePlayerUpdates {
             when (it) {
                 is PresenceAction.Enter -> {
                     Log.d(TAG, "PresenceAction.Enter ${it.player.id}")

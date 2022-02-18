@@ -3,7 +3,6 @@ package com.ably.game.room
 import io.ably.lib.realtime.AblyRealtime
 import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.realtime.ConnectionState
-import io.ably.lib.rest.Auth
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ClientOptions
 import io.ably.lib.types.ErrorInfo
@@ -160,7 +159,13 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
-    suspend fun subscribeToGamePlayerUpdates(): Flow<PresenceAction> {
+    fun subscribeToGamePlayerUpdates(collector: FlowCollector<PresenceAction>){
+        scope.launch {
+            subscibeToUpdatesSuspending().collect(collector)
+        }
+    }
+
+    private suspend fun subscibeToUpdatesSuspending(): Flow<PresenceAction> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)

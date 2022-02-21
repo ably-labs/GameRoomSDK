@@ -60,7 +60,7 @@ Following are some examples of how to use functions that are provided by ```Ably
 You will need to initialise a game environment in order to activate SDK functionality
 
 ```kotlinlang
- val ablyGame = AblyGame.Builder(ABLY_API_KEY)
+val ablyGame = AblyGame.Builder(ABLY_API_KEY)
             .scope(GAME_SCOPE)
             .build()
 
@@ -69,13 +69,14 @@ You should replace ```ABLY_API_KEY``` with your own. Please login into [Ably das
  your own api key.
  ```GAME_SCOPE``` is coroutine scope that you intend to run your AblyGame instance in. A Typical application scope
  for that matter could be defined as
- ```val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)```
-
+ ```
+ val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+ ```
 
  #### Start a game
 
 ```kotlinlang
- ablyGame.start {
+ablyGame.start {
             when(it){
                 AblyGame.GameState.Started -> //TODO replace this with your action of game started
                 AblyGame.GameState.Stopped -> //TODO replace this with your action of game stopped
@@ -103,7 +104,7 @@ You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
 #### Leave a game
 
 ```kotlinlang
-  someCoroutineScope.launch {
+someCoroutineScope.launch {
             val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer!!)
             if (leaveResult.isSuccess) {
                 //leave successful
@@ -119,7 +120,7 @@ You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
 If you want to observe users entering / leaving a game, you can use the following example code
 
 ```kotlinlang
- ablyGame.subscribeToGamePlayerUpdates {
+ablyGame.subscribeToGamePlayerUpdates {
             when (it) {
                 is PresenceAction.Enter -> {
                     Log.d(TAG, "PresenceAction.Enter ${it.player.id}")
@@ -142,7 +143,7 @@ As ```allPlayers``` is a suspending function, you must call this from a coroutin
 
 #### Check if a player is in a game
 ```
-  coroutineScope.launch {
+coroutineScope.launch {
             if (ablyGame.isInGame(gamePlayer)) {
                //do something
             }
@@ -200,7 +201,7 @@ someCoroutineScope.launch {
 #### Register to room messages
 
 ```
- someCoroutineScope.launch {
+someCoroutineScope.launch {
             controller.registerToRoomMessages(room,MessageType.TEXT).collect{ receivedMessage ->
                 // receivedMessage is received as ReceivedMessage
             }
@@ -211,7 +212,7 @@ someCoroutineScope.launch {
 
 If you want to receive messages from all players in room, you can simply use following
 ```
- someCoroutineScope.launch {
+someCoroutineScope.launch {
             controller.registerToPlayerMessagesInRoom(which, who, MessageType.TEXT).collect { receivedMessage ->
                 //received message from receivedMessage.from
             }
@@ -220,7 +221,7 @@ If you want to receive messages from all players in room, you can simply use fol
 
 #### Send message to another player
 ```
-  someCoroutineScope.launch {
+someCoroutineScope.launch {
             val result = controller.sendMessageToPlayer(who, toWhom, GameMessage(messageContent = message))
             when(result){
                 is MessageSentResult.Failed -> TODO()
@@ -234,9 +235,9 @@ You can observe presence events in a room (currently supporting enter and leave)
 notifying other players or updating players in your room.
 
 ```
-      controller.registerToPresenceEvents(which).collect { roomPresenceUpdate ->
-            //do something with roomPresenceUpdate
-         }
+controller.registerToPresenceEvents(which).collect { roomPresenceUpdate ->
+         //do something with roomPresenceUpdate
+      }
 ```
 
 #### Query all players in a room

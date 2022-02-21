@@ -213,7 +213,15 @@ If you want to receive messages from all players in room, you can simply use fol
         }
 ```
 
-###
+#### Register to presence events in a room
+You can observe presence events in a room (currently supporting enter and leave) so you can react to it, for example
+notifying other players or updating players in your room.
+
+```
+      controller.registerToPresenceEvents(which).collect { roomPresenceUpdate ->
+            //do something with roomPresenceUpdate
+         }
+```
 
 
 

@@ -181,3 +181,14 @@ someCoroutineScope.launch {
             }
         }
 ```
+
+### Register to room messages
+
+```
+ someCoroutineScope.launch {
+            controller.registerToRoomMessages(room,MessageType.TEXT).collect{ receivedMessage ->
+                // receivedMessage is received as ReceivedMessage
+            }
+        }
+```
+

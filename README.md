@@ -9,17 +9,17 @@ network
 **Status:** this is an alpha version of the SDK. It means that it contains some functionality and APIs that can
 change without notice.
 
-GameRoomSDK contains following features
+GameRoomSDK has following features
 * Create / initiate a game environment that allows SDK to serve client functions.
-* Start a game : This starts a game and enables players to enter to / leave from a game
-* Query for current players in the game
-* Observe entries / exits from a game
-* Enter into a game
-* Enter into a room in a game,  leave from a room
-* Listen to presence actions in a room
-* Register to messages from other players in a room
-* Send messages to other players in a room
-* List all players within a room
+* Start a game : This starts a game and enables players to enter to / leave from a game.
+* Query for current players in the game.
+* Observe entries / exits from a game.
+* Enter into a game.
+* Enter into a room in a game,  leave from a room in a game.
+* Listen to presence actions in a room.
+* Register to messages from other players in a room.
+* Send messages to other players in a room.
+* List all players that are in a room.
 
 Ably GameRoomSDK is a pure Kotlin library and APIs are heavily based on [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
 

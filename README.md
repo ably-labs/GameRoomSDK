@@ -32,10 +32,22 @@ Please add following line to your ```local.properties``` file to run example app
 
 ## Usage
 
-This library is not yet published on any major publishing platform and only been tested with Android apps. But you
-should be able to use it any Kotlin project by adding checking it out and adding it as a dependency module
+This library is not yet published on any major publishing platform and only been used with an Android app. But you
+should be able to use it any Kotlin project by checking it out and adding it as a dependency module.
 
-//TODO add some more info about how to setup the library
+You can clone library using
+
+```git clone https://github.com/ably-labs/GameRoomSDK.git```
+This will clone the multi module Gradle project including SDK and example app. The easiest way is to examine the
+example app to see how you can add SDK as a dependencey.
+
+If your project is in the same directory as ```ablygamesdk``` is add following to your ```settings.gradle``` file
+```
+include ':ablygamesdk'
+```
+Then in your app level build.gradle file add following
+
+```implementation project(path: ':ablygamesdk')```
 
 ### Global game related functions
 

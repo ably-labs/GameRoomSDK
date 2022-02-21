@@ -155,3 +155,16 @@ val result = controller.enter(yourPlayer,yourRoom)
 
 You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
 instance of ```GameRoom```
+
+### Leave a room
+
+someCoroutineScope.launch{
+val result = controller.leave(yourPlayer,yourRoom)
+            when (result){
+                is RoomPresenceResult.Success -> //successful
+                is RoomPresenceResult.Failure -> //failure
+            }
+}
+
+You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
+instance of ```GameRoom```

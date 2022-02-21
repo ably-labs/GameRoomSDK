@@ -36,8 +36,9 @@ This library is not yet published on any major publishing platform and only been
 should be able to use it any Kotlin project by checking it out and adding it as a dependency module.
 
 You can clone library using
-
-```git clone https://github.com/ably-labs/GameRoomSDK.git```
+```
+git clone https://github.com/ably-labs/GameRoomSDK.git
+```
 This will clone the multi module Gradle project including SDK and example app. The easiest way is to examine the
 example app to see how you can add SDK as a dependencey.
 
@@ -47,11 +48,13 @@ include ':ablygamesdk'
 ```
 Then in your app level build.gradle file add following
 
-```implementation project(path: ':ablygamesdk')```
+```
+implementation project(path: ':ablygamesdk')
+```
 
 ### AblyGame example usages
 
- Following are some examples of how to use functions that are provided by ```AblyGame```
+Following are some examples of how to use functions that are provided by ```AblyGame```
 
 #### Game environment initialisation
 You will need to initialise a game environment in order to activate SDK functionality

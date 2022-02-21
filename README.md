@@ -142,7 +142,7 @@ To get a handle of ```GameRoomController``` in your ```AblyGame``` instance you 
 val roomsController = ablyGame.roomsController
 ```
 
-### Enter a room
+#### Enter a room
 ```
 someCoroutineScope.launch{
 val result = controller.enter(yourPlayer,yourRoom)
@@ -156,7 +156,7 @@ val result = controller.enter(yourPlayer,yourRoom)
 You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
 instance of ```GameRoom```
 
-### Leave a room
+#### Leave a room
 ```
 someCoroutineScope.launch{
 val result = controller.leave(yourPlayer,yourRoom)
@@ -169,7 +169,7 @@ val result = controller.leave(yourPlayer,yourRoom)
 You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
 instance of ```GameRoom```
 
-### Send message to a room
+#### Send message to a room
 You can directly send a message to a room so that all room participants can register to and receive later
 ```
 someCoroutineScope.launch {
@@ -181,7 +181,7 @@ someCoroutineScope.launch {
         }
 ```
 
-### Register to room messages
+#### Register to room messages
 
 ```
  someCoroutineScope.launch {
@@ -191,7 +191,7 @@ someCoroutineScope.launch {
         }
 ```
 
-### Register to player messages in the room
+#### Register to player messages in the room
 
 If you want to receive messages from all players in room, you can simply use following
 ```
@@ -202,7 +202,7 @@ If you want to receive messages from all players in room, you can simply use fol
         }
 ```
 
-### Send message to another player
+#### Send message to another player
 ```
   someCoroutineScope.launch {
             val result = controller.sendMessageToPlayer(who, toWhom, GameMessage(messageContent = message))
@@ -212,6 +212,9 @@ If you want to receive messages from all players in room, you can simply use fol
             }
         }
 ```
+
+###
+
 
 
 

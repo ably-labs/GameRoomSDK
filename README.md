@@ -223,6 +223,17 @@ notifying other players or updating players in your room.
          }
 ```
 
+#### Query all players in a room
+You can query all players in a room like following. Notice that ```allPlayers()``` is a suspending function and needs
+ to be called from a coroutine scope.
+```
+someCoroutineScope.launch{
+   val allPlayers = allPlayers(room)
+
+}
+```
+
+
 
 
 

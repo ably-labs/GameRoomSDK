@@ -7,7 +7,7 @@ sending messages to other players, registering to presence events and more using
 network
 
 **Status:** this is an alpha version of the SDK. It means that it contains some functionality and APIs that can
-change without notice.  The latest release of the SDKs is available in the [Releases section](https://github.com/ably/ably-asset-tracking-android/releases) of this repository.
+change without notice.
 
 GameRoomSDK contains following features
 * Create / initiate a game environment that allows SDK to serve client functions.

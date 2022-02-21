@@ -173,7 +173,6 @@ instance of ```GameRoom```
 You can directly send a message to a room so that all room participants can register to and receive later
 ```
 someCoroutineScope.launch {
-            // _messageSentResult.value =
             val result = controller.sendMessageToRoom(player, room, GameMessage(messageContent = message))
             when(result){
                 is MessageSentResult.Failed -> //message sent failed

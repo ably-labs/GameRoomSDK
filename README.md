@@ -141,3 +141,17 @@ To get a handle of ```GameRoomController``` in your ```AblyGame``` instance you 
 ```
 val roomsController = ablyGame.roomsController
 ```
+
+### Enter a room
+```
+someCoroutineScope.launch{
+val result = controller.enter(yourPlayer,yourRoom)
+            when (result){
+                is RoomPresenceResult.Success -> //successful
+                is RoomPresenceResult.Failure -> //failure
+            }
+}
+```
+
+You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
+instance of ```GameRoom```

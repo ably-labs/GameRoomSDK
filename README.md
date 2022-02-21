@@ -49,9 +49,9 @@ Then in your app level build.gradle file add following
 
 ```implementation project(path: ':ablygamesdk')```
 
-### Global game related functions
+### AblyGame example usages
 
- Following are examples of functions that are provided by ```AblyGame```
+ Following are some examples of how to use functions that are provided by ```AblyGame```
 
 #### Game environment initialisation
 You will need to initialise a game environment in order to activate SDK functionality

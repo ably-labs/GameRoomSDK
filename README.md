@@ -168,3 +168,16 @@ val result = controller.leave(yourPlayer,yourRoom)
 
 You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
 instance of ```GameRoom```
+
+### Send message to a room
+You can directly send a message to a room so that all room participants can register to and receive later
+```
+someCoroutineScope.launch {
+            // _messageSentResult.value =
+            val result = controller.sendMessageToRoom(player, room, GameMessage(messageContent = message))
+            when(result){
+                is MessageSentResult.Failed -> //message sent failed
+                is MessageSentResult.Success -> //message sent is success
+            }
+        }
+```

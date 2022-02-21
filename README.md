@@ -36,7 +36,7 @@ should be able to use it any Kotlin project by adding checking it out and adding
 
 //TODO add some more info about how to setup the library
 
- ### Global game related functions
+### Global game related functions
 
  Following are examples of functions that are provided by ```AblyGame```
 
@@ -130,4 +130,14 @@ As ```allPlayers``` is a suspending function, you must call this from a coroutin
             if (ablyGame.isInGame(gamePlayer)) {
                //do something
             }
+```
+
+### Game room related functions
+All game related functionality is inside ```GameRoomController```. You must get a handle of this to invoke
+functionality related to game rooms
+
+To get a handle of ```GameRoomController``` in your ```AblyGame``` instance you can simply use
+
+```
+val roomsController = ablyGame.roomsController
 ```

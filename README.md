@@ -157,7 +157,7 @@ You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and
 instance of ```GameRoom```
 
 ### Leave a room
-
+```
 someCoroutineScope.launch{
 val result = controller.leave(yourPlayer,yourRoom)
             when (result){
@@ -165,7 +165,7 @@ val result = controller.leave(yourPlayer,yourRoom)
                 is RoomPresenceResult.Failure -> //failure
             }
 }
-
+```
 You must replace ```yourPlayer``` with your own instance of ```GamePlayer``` and ```yourGame``` with your own
 instance of ```GameRoom```
 

@@ -203,4 +203,16 @@ If you want to receive messages from all players in room, you can simply use fol
         }
 ```
 
+### Send message to another player
+```
+  someCoroutineScope.launch {
+            val result = controller.sendMessageToPlayer(who, toWhom, GameMessage(messageContent = message))
+            when(result){
+                is MessageSentResult.Failed -> TODO()
+                is MessageSentResult.Success -> TODO()
+            }
+        }
+```
+
+
 

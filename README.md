@@ -192,3 +192,15 @@ someCoroutineScope.launch {
         }
 ```
 
+### Register to player messages in the room
+
+If you want to receive messages from all players in room, you can simply use following
+```
+ someCoroutineScope.launch {
+            controller.registerToPlayerMessagesInRoom(which, who, MessageType.TEXT).collect { receivedMessage ->
+                //received message from receivedMessage.from
+            }
+        }
+```
+
+

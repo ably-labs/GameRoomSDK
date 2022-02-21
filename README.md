@@ -3,9 +3,10 @@ _[Ably](https://ably.com) is the platform that powers synchronized digital exper
 ## Overview
 
 Ably GameRoomSDK provides an easy way to manage multiplayer game room related events such as entering game rooms,
-sending messages to other players, register to presence events and more using  [Ably](https://ably.com/) realtime network
+sending messages to other players, registering to presence events and more using  [Ably](https://ably.com/) realtime
+network
 
-**Status:** this is an alpha version of the SDK. That means that it contains some functionality and APIs that can
+**Status:** this is an alpha version of the SDK. It means that it contains some functionality and APIs that can
 change without notice.  The latest release of the SDKs is available in the [Releases section](https://github.com/ably/ably-asset-tracking-android/releases) of this repository.
 
 GameRoomSDK contains following features

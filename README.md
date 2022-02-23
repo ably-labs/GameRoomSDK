@@ -105,7 +105,7 @@ You must replace ```gamePlayer``` with your own instance of ```GamePlayer```
 
 ```kotlinlang
 someCoroutineScope.launch {
-            val leaveResult = MultiplayerGameApp.instance.ablyGame.leave(gamePlayer!!)
+            val leaveResult = ablyGame.leave(gamePlayer)
             if (leaveResult.isSuccess) {
                 //leave successful
             } else {

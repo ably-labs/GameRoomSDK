@@ -249,8 +249,3 @@ someCoroutineScope.launch{
    val allPlayers = allPlayers(room)
 }
 ```
-
-
-
-
-

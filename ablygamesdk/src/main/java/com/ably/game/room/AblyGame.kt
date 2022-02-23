@@ -3,7 +3,6 @@ package com.ably.game.room
 import io.ably.lib.realtime.AblyRealtime
 import io.ably.lib.realtime.CompletionListener
 import io.ably.lib.realtime.ConnectionState
-import io.ably.lib.rest.Auth
 import io.ably.lib.types.AblyException
 import io.ably.lib.types.ClientOptions
 import io.ably.lib.types.ErrorInfo
@@ -12,7 +11,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.coroutines.resume
@@ -53,7 +54,13 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
 
     private var gameState = GameState.Idle
 
-    suspend fun start(): Flow<GameState> {
+    fun start(collector: FlowCollector<GameState>) {
+        scope.launch {
+            startSuspending().collect(collector)
+        }
+    }
+
+    private suspend fun startSuspending(): Flow<GameState> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 ably.connection.on { state ->
@@ -130,16 +137,6 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
-    suspend fun numberOfPlayers(): Int {
-        return suspendCoroutine { continuation ->
-            if (isActive()) {
-                continuation.resume(ably.channels[GLOBAL_CHANNEL_NAME].presence.get().size)
-            } else {
-                continuation.resume(0)//maybe we should signal non-active state but let's leave it to this for now
-            }
-        }
-    }
-
     suspend fun allPlayers(): List<GamePlayer> {
         return suspendCoroutine { continuation ->
             if (isActive()) {
@@ -152,7 +149,13 @@ class AblyGame private constructor(private val apiKey: String, val scope: Corout
         }
     }
 
-    suspend fun subscribeToGamePlayerUpdates(): Flow<PresenceAction> {
+    fun subscribeToGamePlayerUpdates(collector: FlowCollector<PresenceAction>){
+        scope.launch {
+            subscibeToUpdatesSuspending().collect(collector)
+        }
+    }
+
+    private suspend fun subscibeToUpdatesSuspending(): Flow<PresenceAction> {
         return suspendCoroutine { continuation ->
             val flow = callbackFlow {
                 val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)

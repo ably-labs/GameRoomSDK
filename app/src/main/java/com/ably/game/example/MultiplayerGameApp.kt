@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 private const val TAG = "MultiplayerGameApp"
+
 class MultiplayerGameApp : Application() {
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     val ablyGame: AblyGame by lazy {
@@ -21,12 +22,9 @@ class MultiplayerGameApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-
-        applicationScope.launch {
-            //observe game state
-            ablyGame.start().collect{
-                Log.d(TAG, "onCreate: ")
-            }
+        //observe game state
+        ablyGame.start {
+            Log.d(TAG, "game start state : $it")
         }
     }
 

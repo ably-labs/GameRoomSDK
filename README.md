@@ -247,7 +247,6 @@ You can query all players in a room like following. Notice that ```allPlayers()`
 ```
 someCoroutineScope.launch{
    val allPlayers = allPlayers(room)
-
 }
 ```
 

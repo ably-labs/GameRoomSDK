@@ -151,7 +151,7 @@ coroutineScope.launch {
 ```
 
 ### Game room related functions
-All game related functionality is inside ```GameRoomController```. You must get a handle of this to invoke
+All game room related functionality is inside ```GameRoomController```. You must get a handle of this to invoke
 functionality related to game rooms
 
 To get a handle of ```GameRoomController``` in your ```AblyGame``` instance you can simply use

@@ -147,6 +147,7 @@ coroutineScope.launch {
             if (ablyGame.isInGame(gamePlayer)) {
                //do something
             }
+}
 ```
 
 ### Game room related functions

@@ -46,7 +46,7 @@ GameRoomSDK will only be able to transmit and receive `id` of your custom `GameR
 
 #### GamePlayer
 This represents the player in your AblyGame environment. Like `GameRoom` it also has an `id` that is intended to
-differentiate players.  This is also an interface so that you can implement your own `GamePlayer`s.interface
+differentiate players.  This is also an interface so that you can implement your own `GamePlayer`s interface.
 
 #### GameMessage
 This is a representation of a GameMessage. This message currently supports 2 types, TEXT and REQUEST.

@@ -30,6 +30,32 @@ Please add following line to your ```local.properties``` file to run example app
 
 - ```ABLY_KEY={YOUR ABLY API KEY}```
 
+## Concepts and terminology
+GameRoomSDK uses simple concepts and terminology to make usage as intuitive as possible.
+
+#### AblyGame
+AblyGame is the environment for your games' multiplayer needs. It is where you initialise the environment and perform
+game wise functions such as entering the environment, leaving the environment and observing changes in the
+environment.
+
+#### GameRoom
+This represents a game room in your AblyGame environment. It has an `id` in order to differentiate with other rooms.
+You should make sure to provide unique ids to each of your `GameRoom` instances. `GameRoom` is an interface, so you
+can create your own custom implementations that suits to your own needs locally. Please beware that currently
+GameRoomSDK will only be able to transmit and receive `id` of your custom `GameRoom` instance.
+
+#### GamePlayer
+This represents the player in your AblyGame environment. Like `GameRoom` it also has an `id` that is intended to
+differentiate players.  This is also an interface so that you can implement your own `GamePlayer`s interface.
+
+#### GameMessage
+This is a representation of a GameMessage. This message currently supports 2 types, TEXT and REQUEST.
+
+#### GameRoomController
+This is the controller that maintains interactions between player and game room. For example entering a room, leaving a
+room, sending and receiveing message while in a room. Its lifecycle starts with player entering a room (including)
+and ends with player leaving a room (including).
+
 ## Usage
 
 This library is not yet published on any major publishing platform and only been used with an Android app. But you

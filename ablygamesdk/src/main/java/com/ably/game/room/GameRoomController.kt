@@ -67,7 +67,7 @@ interface GameRoomController {
 
     suspend fun unregisterFromPlayerMessagesInRoom(room: GameRoom, receiver: GamePlayer): Result<Unit>
     suspend fun allPlayers(inWhich: GameRoom): List<GamePlayer>
-    suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
+    fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate>
     suspend fun unregisterFromPresenceEvents(room: GameRoom)
 }
 
@@ -243,19 +243,16 @@ internal class GameRoomControllerImpl(
         }
     }
 
-    override suspend fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate> {
-        return suspendCoroutine { continuation ->
-            val flow = callbackFlow {
-                val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
-                ably.channels[roomChannel(gameRoom)].presence.subscribe(observedActions) {
-                    when (it.action) {
-                        PresenceMessage.Action.enter -> trySend(RoomPresenceUpdate.Enter(DefaultGamePlayer(it.clientId)))
-                        PresenceMessage.Action.leave -> trySend(RoomPresenceUpdate.Leave(DefaultGamePlayer(it.clientId)))
-                    }
+    override fun registerToPresenceEvents(gameRoom: GameRoom): Flow<RoomPresenceUpdate> {
+        return callbackFlow {
+            val observedActions = EnumSet.of(PresenceMessage.Action.enter, PresenceMessage.Action.leave)
+            ably.channels[roomChannel(gameRoom)].presence.subscribe(observedActions) {
+                when (it.action) {
+                    PresenceMessage.Action.enter -> trySend(RoomPresenceUpdate.Enter(DefaultGamePlayer(it.clientId)))
+                    PresenceMessage.Action.leave -> trySend(RoomPresenceUpdate.Leave(DefaultGamePlayer(it.clientId)))
                 }
-                awaitClose { cancel() }
             }
-            continuation.resume(flow)
+            awaitClose { cancel() }
         }
     }
 

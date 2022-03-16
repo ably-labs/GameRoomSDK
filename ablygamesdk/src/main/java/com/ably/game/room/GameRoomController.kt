@@ -53,14 +53,14 @@ interface GameRoomController {
         message: GameMessage
     ): MessageSentResult
 
-    suspend fun registerToPlayerMessagesInRoom(
+    fun registerToPlayerMessagesInRoom(
         room: GameRoom,
         receiver: GamePlayer,
         messageType: MessageType
     ): Flow<ReceivedMessage>
 
     //register to messages sent to room
-    suspend fun registerToRoomMessages(
+    fun registerToRoomMessages(
         room: GameRoom,
         messageType: MessageType
     ): Flow<ReceivedMessage>
@@ -187,41 +187,36 @@ internal class GameRoomControllerImpl(
 
     }
 
-    override suspend fun registerToRoomMessages(room: GameRoom, messageType: MessageType): Flow<ReceivedMessage> {
-        return suspendCoroutine { continuation ->
-            val flow = callbackFlow {
-                val channelId = roomChannel(room)
-                System.out.println("Registering to channel $channelId")
-                ably.channels[channelId].subscribe(messageType.toString()) { message ->
-                    println("Messaged received from ${message.clientId}")
-                    trySend(ReceivedMessage(DefaultGamePlayer(message.clientId), message.gameMessage()))
-                }
-                awaitClose { cancel() }
+    override fun registerToRoomMessages(room: GameRoom, messageType: MessageType): Flow<ReceivedMessage> {
+        return callbackFlow {
+            val channelId = roomChannel(room)
+            System.out.println("Registering to channel $channelId")
+            ably.channels[channelId].subscribe(messageType.toString()) { message ->
+                println("Messaged received from ${message.clientId}")
+                trySend(ReceivedMessage(DefaultGamePlayer(message.clientId), message.gameMessage()))
             }
-            continuation.resume(flow)
+            awaitClose { cancel() }
         }
     }
 
-    override suspend fun registerToPlayerMessagesInRoom(
+    override fun registerToPlayerMessagesInRoom(
         room: GameRoom,
         receiver: GamePlayer,
         messageType: MessageType
     ): Flow<ReceivedMessage> {
-        return suspendCoroutine { continuation ->
-            val flow = callbackFlow {
-                val allPlayers = allPlayers(room)
-                allPlayers.filter { player -> receiver.id != player.id } //do not create a channel between self-self
-                    .forEach { from ->
-                        val channelId = unidirectionalPlayerChannel(from, receiver)
-                        System.out.println("Registering to channel $channelId")
-                        ably.channels[channelId].subscribe(messageType.toString()) { message ->
-                            println("Messaged received from ${from.id}")
-                            trySend(ReceivedMessage(from, message.gameMessage()))
-                        }
+        return callbackFlow {
+            val allPlayers = allPlayers(room)
+            allPlayers.filter { player -> receiver.id != player.id } //do not create a channel between self-self
+                .forEach { from ->
+                    val channelId = unidirectionalPlayerChannel(from, receiver)
+                    System.out.println("Registering to channel $channelId")
+                    ably.channels[channelId].subscribe(messageType.toString()) { message ->
+                        println("Messaged received from ${from.id}")
+                        trySend(ReceivedMessage(from, message.gameMessage()))
                     }
-                awaitClose { cancel() }
-            }
-            continuation.resume(flow)
+                }
+            awaitClose { cancel() }
+
         }
 
     }
